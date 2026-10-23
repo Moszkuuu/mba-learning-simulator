@@ -1,0 +1,305 @@
+import type { LessonText, QuestionText } from '../types';
+
+export const lessons: Record<string, LessonText> = {
+  'l34-descriptive-statistics': {
+    title: 'Descriptive Statistics',
+    summary: 'Summarise data honestly: centre, spread and what is unusual.',
+    objectives: [
+      'Compute and choose between the mean, median and mode.',
+      'Compute the sample variance and standard deviation.',
+      'Standardise values with z-scores and compare variability with the coefficient of variation.',
+      'Recognise how skew and outliers affect summary measures.',
+    ],
+    explanation: [
+      'Descriptive statistics condense data into a few numbers. Measures of centre are the mean (the arithmetic average), the median (the middle value) and the mode (the most frequent value). The mean uses every observation but is pulled by extreme values; the median is robust to outliers and is preferred for skewed data such as incomes or house prices.',
+      'Spread measures how far observations typically lie from the centre. The sample variance is the sum of squared deviations from the mean divided by n - 1, and the standard deviation is its square root, in the units of the data. Dividing by n - 1 corrects the tendency of a sample to understate the spread of the population.',
+      'A z-score expresses a value as the number of standard deviations from the mean: z = (x - mean) / standard deviation. It allows comparison across different scales and flags unusual values (beyond about 2 or 3). The coefficient of variation, standard deviation divided by the mean, compares relative variability between series with different means.',
+      'Always look at the shape of the data. When the mean is well above the median, the distribution is skewed right. Summaries can hide structure, so charts such as histograms and box plots should accompany numbers.',
+    ],
+    formulas: [
+      { name: 'Mean', expr: 'Mean = Sum of x / n' },
+      { name: 'Sample variance', expr: 's^2 = Sum of (x - mean)^2 / (n - 1)' },
+      { name: 'Standard deviation', expr: 's = square root of s^2' },
+      { name: 'z-score', expr: 'z = (x - mean) / s' },
+      { name: 'Coefficient of variation', expr: 'CV = s / mean' },
+    ],
+    realWorld: 'Reports of average household income usually quote the median, because a small number of very high incomes would pull the mean far above what a typical household earns.',
+    misconceptions: [
+      'The average always describes a typical value. With skewed data the mean can be unrepresentative.',
+      'Standard deviation is the average distance from the mean. It is the root of the average squared distance, which is slightly larger.',
+      'A larger standard deviation always means more risk. Compare it with the mean: use the coefficient of variation.',
+    ],
+    workedExamples: [
+      {
+        title: 'Mean and standard deviation',
+        given: ['Data: 4, 8, 6, 5, 7'],
+        steps: [
+          'Mean = (4 + 8 + 6 + 5 + 7) / 5 = 6',
+          'Deviations: -2, 2, 0, -1, 1; squares: 4, 4, 0, 1, 1; sum = 10',
+          'Sample variance = 10 / (5 - 1) = 2.5; standard deviation = 1.58',
+        ],
+        result: 'The values typically lie about 1.58 units from the mean of 6.',
+      },
+      {
+        title: 'Outliers and the median',
+        given: ['Data: 10, 12, 13, 15, 100'],
+        steps: ['Mean = 150 / 5 = 30', 'Median = 13 (the middle of the sorted values)'],
+        result: 'One extreme value moves the mean to 30, while the median stays at 13 and better describes a typical observation.',
+      },
+    ],
+  },
+  'l35-probability': {
+    title: 'Probability and Expected Value',
+    summary: 'The language of uncertainty: rules, Bayes\' theorem and distributions.',
+    objectives: [
+      'Apply the addition and multiplication rules.',
+      'Compute conditional probabilities and use Bayes\' rule with a base rate.',
+      'Compute the expected value of a discrete distribution.',
+      'Compute a binomial probability.',
+    ],
+    explanation: [
+      'A probability is a number between 0 and 1 measuring how likely an event is. For mutually exclusive events, P(A or B) = P(A) + P(B). For independent events, P(A and B) = P(A) x P(B). The conditional probability P(A | B) = P(A and B) / P(B) is the probability of A once B is known.',
+      'Bayes\' rule updates a prior belief with evidence. If a condition has a low base rate, even a good test produces many false positives, so a positive result is much less conclusive than the test\'s accuracy suggests. Ignoring base rates is a common error.',
+      'The expected value of a random variable is the probability-weighted average of its outcomes. It is the long-run average and is used to compare uncertain options, though it ignores risk.',
+      'A binomial distribution counts the number of successes in n independent trials, each with success probability p: P(k) = C(n, k) p^k (1 - p)^(n - k). It models, for example, the number of defective items in a sample or customers converting among those contacted.',
+    ],
+    formulas: [
+      { name: 'Addition (exclusive events)', expr: 'P(A or B) = P(A) + P(B)' },
+      { name: 'Conditional probability', expr: 'P(A | B) = P(A and B) / P(B)' },
+      { name: 'Bayes with a base rate', expr: 'P(C | +) = base x sens / (base x sens + (1 - base) x false-positive rate)' },
+      { name: 'Expected value', expr: 'E[X] = Sum of x x P(x)' },
+      { name: 'Binomial', expr: 'P(k) = C(n, k) x p^k x (1 - p)^(n - k)' },
+    ],
+    realWorld: 'Fraud-detection teams know that when fraud is rare, even an accurate model flags mostly legitimate transactions, so alerts must be triaged rather than treated as proof.',
+    misconceptions: [
+      'A 95% accurate test means a positive result is 95% likely to be right. It depends on the base rate.',
+      'Independent and mutually exclusive mean the same. Mutually exclusive events are strongly dependent: if one occurs, the other cannot.',
+      'The expected value is the most likely outcome. It may be a value that never occurs.',
+    ],
+    workedExamples: [
+      {
+        title: 'Bayes\' rule',
+        given: ['2% of items are defective', 'A test flags 95% of defective items and 10% of good items'],
+        steps: [
+          'P(positive and defective) = 0.02 x 0.95 = 0.019',
+          'P(positive and good) = 0.98 x 0.10 = 0.098',
+          'P(defective | positive) = 0.019 / (0.019 + 0.098) = 16.2%',
+        ],
+        result: 'Only about 16% of flagged items are actually defective, because defects are rare.',
+      },
+      {
+        title: 'Binomial probability',
+        given: ['5 items inspected, each defective with probability 0.1'],
+        steps: ['P(exactly 2) = C(5, 2) x 0.1^2 x 0.9^3 = 10 x 0.01 x 0.729 = 0.0729'],
+        result: 'The chance of exactly two defective items is 7.29%.',
+      },
+    ],
+  },
+  'l36-inference': {
+    title: 'Statistical Inference: Intervals and Tests',
+    summary: 'Draw conclusions about a population from a sample, and know how sure you can be.',
+    objectives: [
+      'Compute a standard error and a confidence interval for a mean.',
+      'Carry out and interpret a z-test and a p-value.',
+      'Determine the sample size needed for a target margin of error.',
+      'Interpret an A/B test and avoid common errors (multiple testing, confusing statistical and practical significance).',
+    ],
+    explanation: [
+      'A sample mean varies from sample to sample. Its standard deviation, the standard error, is the standard deviation of the data divided by the square root of the sample size, so precision improves with the square root of n: quadrupling the sample halves the standard error.',
+      'A 95% confidence interval is the sample mean plus or minus about 1.96 standard errors. It means that the method captures the true value in 95% of repeated samples, not that the true value is 95% likely to lie in this interval.',
+      'A hypothesis test asks whether the data are surprising if a null hypothesis is true. The test statistic z = (sample mean - hypothesised mean) / standard error; the p-value is the probability of a result at least as extreme if the null is true. A small p-value (for example below 0.05) is evidence against the null. A type I error rejects a true null; a type II error fails to reject a false one.',
+      'In practice, a statistically significant result may be too small to matter, and a non-significant one may reflect a sample that was too small. Running many tests will produce some significant results by chance. Good analysis states effect sizes, intervals and the number of comparisons.',
+    ],
+    formulas: [
+      { name: 'Standard error', expr: 'SE = s / square root of n' },
+      { name: '95% confidence interval', expr: 'mean +/- 1.96 x SE' },
+      { name: 'z statistic', expr: 'z = (sample mean - hypothesised mean) / SE' },
+      { name: 'Required sample size', expr: 'n = (1.96 x s / margin)^2, rounded up' },
+    ],
+    realWorld: 'Online retailers run A/B tests on web pages: they compare conversion rates between two versions and require a minimum sample so that the result is not due to chance.',
+    misconceptions: [
+      'A p-value is the probability that the null hypothesis is true. It is the probability of the data, or more extreme data, if the null is true.',
+      'Not significant means no effect. It may mean the sample was too small to detect it.',
+      'A significant result is an important one. Statistical significance is not practical importance.',
+    ],
+    workedExamples: [
+      {
+        title: 'Confidence interval and test',
+        given: ['n = 100, sample mean 52, standard deviation 10', 'Null hypothesis: the mean is 50'],
+        steps: [
+          'SE = 10 / square root of 100 = 1',
+          '95% interval = 52 +/- 1.96 x 1 = 50.04 to 53.96',
+          'z = (52 - 50) / 1 = 2.0; two-sided p-value = 0.0455',
+        ],
+        result: 'The null of 50 is rejected at the 5% level, but only just; the interval barely excludes 50.',
+      },
+      {
+        title: 'An A/B test',
+        given: ['Version A: 200 conversions out of 2,000 (10%)', 'Version B: 240 conversions out of 2,000 (12%)'],
+        steps: [
+          'Difference = 2 percentage points',
+          'SE of the difference = square root of (0.10 x 0.90/2,000 + 0.12 x 0.88/2,000) = 0.0099',
+          'z = 0.02 / 0.0099 = 2.02; two-sided p-value = 0.043',
+        ],
+        result: 'Borderline significant: a 2-point gain worth confirming with a larger or repeated test before rolling out.',
+      },
+    ],
+  },
+  'l37-regression-forecasting': {
+    title: 'Regression and Forecasting',
+    summary: 'Model relationships and project the future - and know the limits.',
+    objectives: [
+      'Fit and interpret a simple linear regression (slope, intercept, R-squared).',
+      'Use a regression equation to predict.',
+      'Apply moving-average and exponential smoothing forecasts.',
+      'Measure forecast error and recognise the dangers of extrapolation and confusing correlation with causation.',
+    ],
+    explanation: [
+      'Simple linear regression fits a line y = a + bx to data by minimising squared errors. The slope b = covariance of x and y divided by the variance of x, here Sxy / Sxx, is the average change in y per unit change in x; the intercept a = mean y - b x mean x. R-squared is the share of the variation in y explained by x.',
+      'A regression describes association within the range of observed data. It does not prove causation, and predictions far outside that range (extrapolation) are unreliable. Residuals, the differences between actual and fitted values, should look random; patterns in them signal a poor model.',
+      'Time-series forecasts for demand often use simple methods. A moving average forecasts with the mean of the last k periods. Exponential smoothing updates the previous forecast by a fraction alpha of the latest error: new forecast = previous forecast + alpha x (actual - previous forecast).',
+      'Forecast accuracy is measured by errors such as the mean absolute percentage error (MAPE). A forecast should be judged on data not used to build it, and the uncertainty around it should be communicated.',
+    ],
+    formulas: [
+      { name: 'Slope', expr: 'b = Sxy / Sxx = Sum of (x - mean x)(y - mean y) / Sum of (x - mean x)^2' },
+      { name: 'Intercept', expr: 'a = mean y - b x mean x' },
+      { name: 'Exponential smoothing', expr: 'F(new) = F(old) + alpha x (Actual - F(old))' },
+      { name: 'MAPE', expr: 'MAPE = average of |Actual - Forecast| / Actual x 100' },
+    ],
+    realWorld: 'Retailers regress sales on advertising spend and price to estimate effects, and use smoothing methods for weekly replenishment forecasts.',
+    misconceptions: [
+      'A high R-squared proves the relationship is causal. It only shows a good fit.',
+      'The fitted line can be used for any value of x. Outside the observed range it may fail.',
+      'A forecast is a single number. It should come with a range.',
+    ],
+    workedExamples: [
+      {
+        title: 'Fitting a line',
+        given: ['x: 1, 2, 3, 4, 5', 'y: 3, 5, 7, 10, 12'],
+        steps: [
+          'Means: x = 3, y = 7.4; Sxy = 8.8 + 2.4 + 0 + 2.6 + 9.2 = 23; Sxx = 10',
+          'Slope = 23 / 10 = 2.3; intercept = 7.4 - 2.3 x 3 = 0.5',
+          'Prediction at x = 6: 0.5 + 2.3 x 6 = 14.3; R-squared = 0.994',
+        ],
+        result: 'Each extra unit of x is associated with 2.3 more units of y, and the line explains about 99% of the variation.',
+      },
+      {
+        title: 'Smoothing forecast',
+        given: ['Previous forecast 120, actual 130, alpha = 0.3'],
+        steps: ['New forecast = 120 + 0.3 x (130 - 120) = 123'],
+        result: 'The forecast moves 30% of the way toward the latest actual value.',
+      },
+    ],
+  },
+};
+
+export const questions: Record<string, QuestionText> = {
+  l34q1: {
+    concept: 'Choosing a measure of centre',
+    prompt: 'Why is the median often preferred to the mean for household income data?',
+    options: [
+      { text: 'It is not affected by a few very high incomes', why: 'Correct - the median depends only on the middle of the ordered data, so extreme values barely move it.' },
+      { text: 'It uses every observation in its calculation', why: 'This describes the mean; the median uses only the order.' },
+      { text: 'It is always larger than the mean', why: 'The median may be above or below the mean.' },
+      { text: 'It is easier to compute for large samples', why: 'Ease is not the reason for preferring it.' },
+    ],
+    explanation: 'Income is right-skewed; the median is robust to the extremes and describes the typical household better.',
+  },
+  l34q2: { concept: 'Mean', prompt: 'What is the mean of 12, 15, 9, 20 and 14?', explanation: '(12 + 15 + 9 + 20 + 14) / 5 = 70 / 5 = 14.' },
+  l34q3: { concept: 'Sample standard deviation', prompt: 'What is the sample standard deviation of 4, 8, 6, 5 and 7 (to two decimals)?', explanation: 'Mean = 6. Squared deviations sum to 10. Variance = 10 / 4 = 2.5. Standard deviation = 1.58.', commonMistake: 'Dividing by n (5) instead of n - 1 (4), which gives 1.41.' },
+  l34q4: { concept: 'z-score', prompt: 'A score of 85 is observed where the mean is 70 and the standard deviation is 10. What is the z-score?', explanation: '(85 - 70) / 10 = 1.5.' },
+  l34q5: { concept: 'Coefficient of variation', prompt: 'A series has a mean of 50 and a standard deviation of 10. What is the coefficient of variation (%)?', explanation: '10 / 50 = 0.20 = 20%.' },
+  l34q6: {
+    concept: 'Skew and choice of average',
+    scenario: 'A company reports that the mean salary is $80,000 and the median salary is $55,000.',
+    prompt: 'What is the best interpretation?',
+    options: [
+      { text: 'Half of the employees earn exactly $80,000', why: 'The median, not the mean, splits the employees into halves.' },
+      { text: 'The data must contain an error, since the mean and median differ', why: 'It is normal for them to differ in skewed data.' },
+      { text: 'Salaries are skewed to the right by a few high earners; the median better describes a typical employee', why: 'Correct - the mean is well above the median because high salaries pull it up.' },
+      { text: 'Salaries are skewed to the left, so the median overstates the typical salary', why: 'A mean above the median indicates right skew, not left.' },
+    ],
+    explanation: 'A mean far above the median signals positive (right) skew. The median is a more representative figure for a typical employee.',
+  },
+  l35q1: {
+    concept: 'Independent events',
+    prompt: 'Two events are independent. P(A) = 0.5 and P(B) = 0.4. What is P(A and B)?',
+    options: [
+      { text: '0.9', why: 'This adds the probabilities, which is the rule for mutually exclusive events (and would be greater than needed).' },
+      { text: '0.1', why: 'This is the difference of the probabilities.' },
+      { text: '0.45', why: 'This is the average of the probabilities.' },
+      { text: '0.2', why: 'Correct - for independent events P(A and B) = 0.5 x 0.4 = 0.2.' },
+    ],
+    explanation: 'For independent events the joint probability is the product of the individual probabilities.',
+  },
+  l35q2: { concept: 'Addition rule', prompt: 'Events A and B are mutually exclusive with P(A) = 0.30 and P(B) = 0.20. What is P(A or B), as a percentage?', explanation: '0.30 + 0.20 = 0.50 = 50%.' },
+  l35q3: { concept: 'Expected value', prompt: 'A project pays 0 with probability 0.5, 100 with probability 0.3 and 200 with probability 0.2. What is the expected payoff?', explanation: '0 x 0.5 + 100 x 0.3 + 200 x 0.2 = 0 + 30 + 40 = 70.' },
+  l35q4: { concept: 'Bayes\' rule', prompt: '2% of items are defective. A test flags 95% of defective items and also flags 10% of good items. If an item is flagged, what is the probability (%) that it is defective?', explanation: 'P = 0.02 x 0.95 / (0.02 x 0.95 + 0.98 x 0.10) = 0.019 / 0.117 = 16.24%.', commonMistake: 'Answering 95%, which ignores the base rate and the false positives.' },
+  l35q5: { concept: 'Binomial probability', prompt: 'Five items are inspected and each is defective with probability 0.1, independently. What is the probability (%) that exactly two are defective?', explanation: 'C(5, 2) x 0.1^2 x 0.9^3 = 10 x 0.01 x 0.729 = 0.0729 = 7.29%.' },
+  l35q6: {
+    concept: 'Base-rate neglect',
+    scenario: 'A fraud model is described as "95% accurate": it flags 95% of fraudulent payments and wrongly flags 10% of legitimate ones. Only 2% of payments are fraudulent. A payment has just been flagged.',
+    prompt: 'What is the best guidance for the analyst?',
+    options: [
+      { text: 'Treat it as fraud: there is a 95% chance', why: 'This confuses sensitivity with the probability of fraud given a flag.' },
+      { text: 'Treat it as suspicious but probably legitimate: only about 16% of flagged payments are fraud, so review rather than block', why: 'Correct - with a 2% base rate, 0.019 / (0.019 + 0.098) = 16.2% of flags are real fraud.' },
+      { text: 'Ignore the flag: the model is inaccurate', why: 'A 16% fraud rate among flags is still eight times the base rate of 2%, so the flag is informative.' },
+      { text: 'The chance of fraud is 10%, the false-positive rate', why: 'The false-positive rate is not the probability that a flagged payment is fraud.' },
+    ],
+    explanation: 'Because fraud is rare, most flags are false alarms, yet a flag raises the probability from 2% to about 16%, which justifies review but not automatic blocking.',
+  },
+  l36q1: {
+    concept: 'Meaning of a p-value',
+    prompt: 'A test gives a p-value of 0.03. What does this mean?',
+    options: [
+      { text: 'There is a 3% chance that the null hypothesis is true', why: 'A p-value is not the probability of the hypothesis.' },
+      { text: 'If the null hypothesis were true, a result at least this extreme would occur about 3% of the time', why: 'Correct - this is the definition of the p-value.' },
+      { text: 'The effect is large', why: 'A p-value says nothing about effect size.' },
+      { text: 'There is a 97% chance that the alternative is true', why: 'This also treats the p-value as a probability of a hypothesis.' },
+    ],
+    explanation: 'The p-value measures how surprising the data would be if the null were true, not how likely the null is.',
+  },
+  l36q2: { concept: 'Standard error', prompt: 'The sample standard deviation is 20 and the sample size is 100. What is the standard error of the mean?', explanation: '20 / square root of 100 = 20 / 10 = 2.' },
+  l36q3: { concept: 'Margin of error', prompt: 'The standard error is 1.5. What is the 95% margin of error (use 1.96)?', explanation: '1.96 x 1.5 = 2.94.' },
+  l36q4: { concept: 'z statistic', prompt: 'The sample mean is 52, the hypothesised mean is 50 and the standard error is 1. What is the z statistic?', explanation: '(52 - 50) / 1 = 2.0.' },
+  l36q5: { concept: 'Sample size', prompt: 'The standard deviation is about 10. What sample size is needed for a 95% margin of error of 2 (use 1.96, round up)?', explanation: 'n = (1.96 x 10 / 2)^2 = 9.8^2 = 96.04, which is rounded up to 97.' },
+  l36q6: {
+    concept: 'Interpreting an A/B test',
+    scenario: 'A test of a new checkout page gives a conversion rate of 12% against 10% for the old one, with 2,000 visitors each and a p-value of 0.043. The team has also run 19 other tests this quarter.',
+    prompt: 'What is the most sensible conclusion?',
+    options: [
+      { text: 'Promising but not conclusive: a 2-point gain is borderline, and with many tests a false positive is plausible, so replicate before a full roll-out', why: 'Correct - a p-value just under 0.05 is weak evidence, especially with multiple tests.' },
+      { text: 'The new page is proven to be better, so roll it out', why: 'A borderline p-value does not prove anything.' },
+      { text: 'There is no difference, because the p-value is not very small', why: 'A p-value below 0.05 is evidence of a difference, though not strong evidence.' },
+      { text: 'There is a 95.7% chance that the new page is better', why: 'The p-value is not the probability that the new page is better.' },
+    ],
+    explanation: 'With many tests run, some borderline results arise by chance. Confirm with a larger or repeated test and consider the practical value of a 2-point lift.',
+  },
+  l37q1: {
+    concept: 'Interpreting a slope',
+    prompt: 'A regression of weekly sales on advertising spend (both in $ thousand) gives a slope of 2.3. What does this mean?',
+    options: [
+      { text: 'Advertising explains 2.3% of the variation in sales', why: 'That would be R-squared, not the slope.' },
+      { text: 'Each $1 thousand of advertising causes $2.3 thousand of extra sales', why: 'The slope shows association; causation needs additional evidence.' },
+      { text: 'Each additional $1 thousand of advertising is associated with $2.3 thousand more sales on average', why: 'Correct - the slope is the average change in y for a one-unit change in x.' },
+      { text: 'Sales are $2.3 thousand when advertising is zero', why: 'That would be the intercept.' },
+    ],
+    explanation: 'The slope is the average change in the dependent variable per unit of the independent variable; it describes association within the data range.',
+  },
+  l37q2: { concept: 'Prediction', prompt: 'A fitted line is y = 0.5 + 2.3x. What is the predicted y at x = 6?', explanation: '0.5 + 2.3 x 6 = 0.5 + 13.8 = 14.3.' },
+  l37q3: { concept: 'Slope calculation', prompt: 'For some data Sxy = 23 and Sxx = 10. What is the regression slope?', explanation: '23 / 10 = 2.3.' },
+  l37q4: { concept: 'Exponential smoothing', prompt: 'The previous forecast was 120, the actual demand was 130 and alpha is 0.3. What is the new forecast?', explanation: '120 + 0.3 x (130 - 120) = 120 + 3 = 123.' },
+  l37q5: { concept: 'MAPE', prompt: 'Actual demand was 100 and 200 in two periods; forecasts were 90 and 220. What is the MAPE (%)?', explanation: 'Errors: |100 - 90| / 100 = 10%; |200 - 220| / 200 = 10%. Average = 10%.' },
+  l37q6: {
+    concept: 'Extrapolation',
+    scenario: 'A model fitted on advertising spend between $1 thousand and $5 thousand has an R-squared of 0.99. A manager uses it to forecast sales for a spend of $50 thousand.',
+    prompt: 'What is the main problem?',
+    options: [
+      { text: 'R-squared is too high to be trusted', why: 'A high R-squared is not itself a problem.' },
+      { text: 'The slope must be wrong', why: 'The slope may be fine within the data.' },
+      { text: 'Regression cannot be used for forecasting', why: 'It can be, within sensible limits.' },
+      { text: 'The prediction is an extrapolation far beyond the data; the relationship may not hold (for example, diminishing returns)', why: 'Correct - a good fit within the range says little about behaviour ten times beyond it.' },
+    ],
+    explanation: 'Extrapolating beyond the observed range assumes the same relationship continues. Saturation or other changes often break it.',
+  },
+};

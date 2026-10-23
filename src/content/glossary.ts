@@ -1,0 +1,31 @@
+/** Shared EN/TH term list. Thai terms are a DRAFT pending review by a finance-literate Thai reader. */
+export interface GlossaryEntry { en: string; th: string }
+
+export const GLOSSARY: GlossaryEntry[] = [
+  { en: 'Revenue', th: 'รายได้' },
+  { en: 'Cost of Goods Sold (COGS)', th: 'ต้นทุนขาย' },
+  { en: 'Gross profit', th: 'กำไรขั้นต้น' },
+  { en: 'Gross margin', th: 'อัตรากำไรขั้นต้น' },
+  { en: 'Operating expenses', th: 'ค่าใช้จ่ายในการดำเนินงาน' },
+  { en: 'Operating profit (EBIT)', th: 'กำไรจากการดำเนินงาน' },
+  { en: 'Net profit', th: 'กำไรสุทธิ' },
+  { en: 'Accounts receivable', th: 'ลูกหนี้การค้า' },
+  { en: 'Accounts payable', th: 'เจ้าหนี้การค้า' },
+  { en: 'Inventory', th: 'สินค้าคงเหลือ' },
+  { en: 'Working capital', th: 'เงินทุนหมุนเวียน' },
+  { en: 'Days sales outstanding (DSO)', th: 'ระยะเวลาเก็บหนี้เฉลี่ย' },
+  { en: 'Days payable outstanding (DPO)', th: 'ระยะเวลาจ่ายหนี้เฉลี่ย' },
+  { en: 'Days inventory outstanding (DIO)', th: 'ระยะเวลาขายสินค้าเฉลี่ย' },
+  { en: 'Cash conversion cycle', th: 'วงจรเงินสด' },
+  { en: 'Operating cash flow', th: 'กระแสเงินสดจากการดำเนินงาน' },
+  { en: 'Depreciation', th: 'ค่าเสื่อมราคา' },
+  { en: 'Accrual accounting', th: 'การบัญชีเกณฑ์คงค้าง' },
+  { en: 'Fixed costs', th: 'ต้นทุนคงที่' },
+  { en: 'Variable costs', th: 'ต้นทุนผันแปร' },
+  { en: 'Contribution margin', th: 'กำไรส่วนเกิน' },
+  { en: 'Break-even point', th: 'จุดคุ้มทุน' },
+  { en: 'Margin of safety', th: 'ส่วนเผื่อความปลอดภัย' },
+  { en: 'Overdraft', th: 'เงินเบิกเกินบัญชี' },
+  { en: 'Equity', th: 'ส่วนของเจ้าของ' },
+  { en: 'Markup', th: 'อัตราบวกเพิ่มจากต้นทุน' },
+];

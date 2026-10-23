@@ -1,0 +1,342 @@
+import type { LessonText, QuestionText } from '../types';
+
+export const lessons: Record<string, LessonText> = {
+  'l26-industry-analysis': {
+    title: 'Industry Analysis: The Five Forces',
+    summary: 'Why some industries are more profitable than others.',
+    objectives: [
+      'Use the five forces framework to assess industry attractiveness.',
+      'Measure concentration with concentration ratios and the HHI.',
+      'Explain how a merger changes concentration.',
+      'Identify the limits of structural analysis.',
+    ],
+    explanation: [
+      'Profitability depends partly on the structure of the industry a firm competes in. Porter\'s five forces framework describes it through the threat of new entrants, the bargaining power of suppliers, the bargaining power of buyers, the threat of substitutes, and rivalry among existing competitors. When the forces are strong, they transfer profit from the industry to suppliers, buyers or consumers.',
+      'Entry is deterred by scale economies, capital needs, brand loyalty, switching costs and access to channels. Suppliers and buyers have power when they are concentrated, when switching is cheap, or when they could integrate. Substitutes cap prices. Rivalry is intense when competitors are numerous and similar, growth is slow, fixed costs are high and exit is costly.',
+      'Concentration is a quantitative proxy for rivalry. The n-firm concentration ratio sums the shares of the largest n firms. The Herfindahl-Hirschman Index (HHI) sums the squared percentage shares of all firms, so it weights large firms more; it ranges from near 0 to 10,000 for a monopoly. A merger of two firms raises the HHI by twice the product of their shares.',
+      'The framework is a snapshot. It does not say how the firm should compete, it is less reliable in fast-changing industries and it misses complementors. It is best used to ask what profit pool exists and who captures it, and as the starting point for choosing a position.',
+    ],
+    formulas: [
+      { name: 'Five forces', expr: 'Entrants, Suppliers, Buyers, Substitutes, Rivalry -> industry profit potential' },
+      { name: 'Concentration ratio', expr: 'CRn = sum of the n largest market shares (%)' },
+      { name: 'HHI', expr: 'HHI = sum of (share %)^2' },
+      { name: 'Merger effect on HHI', expr: 'Change in HHI = 2 x share A x share B' },
+    ],
+    realWorld: 'The airline industry has historically earned low returns despite strong demand: capacity can be added easily, fares are transparent, fuel and labour suppliers are powerful and fixed costs are high.',
+    misconceptions: [
+      'Fast-growing industries are always profitable. Growth attracts entrants and rivalry can still erode returns.',
+      'High concentration always means high profit. The other forces, such as powerful buyers, can offset it.',
+      'The five forces tell a firm what to do. They describe the arena; the firm must still choose a position within it.',
+    ],
+    workedExamples: [
+      {
+        title: 'Concentration and a merger',
+        given: ['Four firms hold market shares of 40%, 30%, 20% and 10%'],
+        steps: [
+          'CR2 = 40 + 30 = 70%',
+          'HHI = 40^2 + 30^2 + 20^2 + 10^2 = 1,600 + 900 + 400 + 100 = 3,000',
+          'If the 20% and 10% firms merge, shares become 40, 30 and 30: HHI = 1,600 + 900 + 900 = 3,400',
+          'Check: the increase is 2 x 20 x 10 = 400',
+        ],
+        result: 'The market is already concentrated at 3,000; the merger raises the HHI by 400 to 3,400.',
+      },
+      {
+        title: 'Reading the forces',
+        given: ['Supermarket suppliers are a few global brands; shoppers can switch stores freely; discount rivals compete aggressively on price'],
+        steps: [
+          'Supplier power is high: concentrated suppliers can raise input prices',
+          'Buyer power is high: low switching costs mean shoppers push prices down',
+          'Rivalry is high: similar offers and price competition',
+        ],
+        result: 'These forces together explain thin margins in grocery retail, even when sales volumes are large.',
+      },
+    ],
+  },
+  'l27-competitive-advantage': {
+    title: 'Competitive Advantage: Cost, Differentiation and Resources',
+    summary: 'How a firm earns above-average returns and keeps them.',
+    objectives: [
+      'Contrast cost leadership, differentiation and focus strategies.',
+      'Use the experience curve to forecast cost.',
+      'Compute the price premium a differentiator needs.',
+      'Apply VRIO to judge whether an advantage is sustainable.',
+    ],
+    explanation: [
+      'A firm has a competitive advantage when it creates more value for customers than its competitors at a given cost, or the same value at a lower cost. Generic strategies are cost leadership (the lowest cost in the industry for a comparable offer), differentiation (a unique offer for which customers pay a premium) and focus (either of these aimed at a narrow segment).',
+      'Costs fall with cumulative experience through learning, scale and process improvement. With an 80% experience curve, unit cost falls to 80% of its previous level each time cumulative output doubles. Firms with a head start can reach a lower cost position, provided they translate experience into price or margin.',
+      'A differentiator accepts a higher cost, so it needs a price premium at least as large as the extra cost to earn the same unit margin as a low-cost rival. The premium is acceptable only if customers value the difference enough to pay it.',
+      'The resource-based view asks whether a resource is Valuable, Rare, hard to Imitate and exploited by the Organisation (VRIO). Only resources that meet all four tests sustain an advantage; those that are valuable but common give only parity.',
+    ],
+    formulas: [
+      { name: 'Experience curve', expr: 'Unit Cost(n) = First Unit Cost x n^(log2 of learning rate)' },
+      { name: 'Cost after each doubling', expr: 'Cost = Previous Cost x Learning Rate (e.g. 0.8)' },
+      { name: 'Required price premium', expr: 'Premium = (Rival Price - Rival Cost + Own Cost) / Rival Price - 1' },
+      { name: 'VRIO', expr: 'Valuable, Rare, costly to Imitate, Organised to capture value' },
+    ],
+    realWorld: 'Walmart\'s purchasing scale and logistics give it a cost-leadership position, whereas Apple differentiates through design and ecosystem and sustains a price premium.',
+    misconceptions: [
+      'Low price is the only way to win. Differentiation can sustain higher returns.',
+      'Any advantage lasts. Valuable but easily imitated resources give no sustained edge.',
+      'Being cheaper and better at once is a strategy. Trying to do everything often leaves a firm stuck in the middle.',
+    ],
+    workedExamples: [
+      {
+        title: 'Experience curve',
+        given: ['First unit costs $100', 'Learning rate 80% per doubling of cumulative output'],
+        steps: [
+          '2 units: 100 x 0.8 = $80',
+          '4 units: 80 x 0.8 = $64',
+          '8 units: 64 x 0.8 = $51.20',
+        ],
+        result: 'After three doublings the cost per unit has fallen by almost half, to $51.20.',
+      },
+      {
+        title: 'Price premium for differentiation',
+        given: ['Rival sells at $80 with a cost of $50 (margin $30)', 'The differentiator\'s cost is $60'],
+        steps: ['Price needed for a $30 margin = 60 + 30 = $90', 'Premium = 90 / 80 - 1 = 12.5%'],
+        result: 'The differentiator must command a price 12.5% above the rival to match its unit margin.',
+      },
+    ],
+  },
+  'l28-corporate-strategy': {
+    title: 'Corporate Strategy: Portfolios, Integration and Acquisitions',
+    summary: 'Which businesses to be in, and how to add value across them.',
+    objectives: [
+      'Classify businesses in a growth-share matrix.',
+      'Evaluate when vertical integration and diversification create value.',
+      'Value an acquisition including synergies and the premium paid.',
+      'Judge uncertainty in synergy estimates.',
+    ],
+    explanation: [
+      'Corporate strategy asks which businesses the firm should own and how the centre adds value. The growth-share matrix classifies business units by market growth and relative market share. Stars (high growth, high share) need investment; cash cows (low growth, high share) fund the group; question marks (high growth, low share) must be built or sold; dogs (low growth, low share) are candidates for divestment. The matrix is a simple screen, not a full valuation.',
+      'Relative market share is the unit\'s share divided by the share of its largest competitor; a value above 1 means market leadership. Vertical integration can secure supply and capture margin but adds fixed cost and reduces flexibility; diversification creates value only if the firm has resources that transfer or if it can finance and govern units better than the market.',
+      'An acquisition creates value for the buyer only if the synergies it captures exceed the premium paid over the target\'s standalone value. Maximum price = standalone value + synergies; the buyer\'s net gain = synergies - premium. Competitive bidding passes much of the value to the seller (the winner\'s curse).',
+      'Synergy estimates are uncertain and usually optimistic; revenue synergies are harder to realise than cost synergies. A prudent buyer values synergies in scenarios and does not pay away the whole expected gain.',
+    ],
+    formulas: [
+      { name: 'Relative market share', expr: 'RMS = Own Share / Largest Rival Share' },
+      { name: 'Acquirer\'s net gain', expr: 'Gain = Synergies - (Price Paid - Standalone Value)' },
+      { name: 'Maximum price', expr: 'Max Price = Standalone Value + Synergies' },
+      { name: 'Expected synergies', expr: 'E[Synergies] = Sum of Probability x Synergy' },
+    ],
+    realWorld: 'Many acquisitions fail to earn their cost of capital because buyers pay premiums that reflect hoped-for synergies which do not fully materialise.',
+    misconceptions: [
+      'A big diversified group is more valuable than the sum of its parts. Often the opposite - a conglomerate discount.',
+      'Any acquisition with a positive synergy estimate is good. It must exceed the premium and be risk-adjusted.',
+      'Dogs should always be closed. They may still generate cash or support other units.',
+    ],
+    workedExamples: [
+      {
+        title: 'Value of an acquisition',
+        given: ['Target\'s standalone value $500 million', 'Present value of synergies $150 million', 'Price paid $600 million (premium $100 million)'],
+        steps: [
+          'Maximum price = 500 + 150 = $650 million, a 30% premium',
+          'Net gain to the buyer = 150 - 100 = $50 million',
+        ],
+        result: 'The buyer keeps $50 million of the $150 million of synergies; the seller captures $100 million.',
+      },
+      {
+        title: 'Relative share',
+        given: ['Own market share 15%, largest rival 30%'],
+        steps: ['RMS = 15 / 30 = 0.5'],
+        result: 'A relative share of 0.5 places the unit in the low-share half of the matrix.',
+      },
+    ],
+  },
+  'l29-decisions-uncertainty': {
+    title: 'Decisions Under Uncertainty',
+    summary: 'Using probabilities, trees and the value of information to decide when outcomes are not certain.',
+    objectives: [
+      'Compute an expected monetary value (EMV) for a decision.',
+      'Find the break-even probability of a gamble.',
+      'Compute the expected value of perfect information and judge a pilot or study.',
+      'Explain when EMV is not the right criterion.',
+    ],
+    explanation: [
+      'Strategic decisions are made before outcomes are known. A decision tree lists the choices, the uncertain events with their probabilities and the payoffs. The expected monetary value of a choice is the sum of each payoff times its probability. Choosing the highest EMV maximises the long-run average payoff for a risk-neutral decision maker.',
+      'The break-even probability is the chance of success at which the gamble has an EMV of zero: loss / (gain + loss). Comparing it with a realistic probability shows how much margin there is for error in the forecast.',
+      'Information has value when it could change the decision. The expected value of perfect information (EVPI) is the EMV if the state were known in advance minus the EMV of the best decision without it. It is the most you should pay for any study; an imperfect study is worth less.',
+      'EMV is not always the right rule: a firm may be unable to survive a large loss (risk aversion), a one-off decision cannot average out, and probabilities themselves may be uncertain. Scenario planning and rules such as maximin complement expected values.',
+    ],
+    formulas: [
+      { name: 'EMV', expr: 'EMV = Sum of (Probability x Payoff)' },
+      { name: 'Break-even probability', expr: 'p* = Loss / (Gain + Loss)' },
+      { name: 'EVPI', expr: 'EVPI = EMV with perfect information - EMV of best choice without it' },
+      { name: 'Value of a study', expr: 'Net value = EMV with the study (after its cost) - EMV without it' },
+    ],
+    realWorld: 'Pharmaceutical firms value each stage of drug development as a decision tree in which early, cheaper trials reveal whether to commit to costly late-stage studies.',
+    misconceptions: [
+      'A positive EMV guarantees profit. It is an average; any single outcome can be a loss.',
+      'More information is always worth buying. It is worth buying only if it can change the decision and costs less than its value.',
+      'Probabilities in a business case are facts. They are judgements and should be tested.',
+    ],
+    workedExamples: [
+      {
+        title: 'EMV and EVPI',
+        given: ['Launch: 40% chance of a $500 gain; 60% chance of a $200 loss (in $ thousands)', 'Not launching pays $0'],
+        steps: [
+          'EMV of launching = 0.4 x 500 + 0.6 x (-200) = 200 - 120 = $80',
+          'With perfect information, launch only when it succeeds: 0.4 x 500 + 0.6 x 0 = $200',
+          'EVPI = 200 - 80 = $120',
+        ],
+        result: 'Launching is worth $80 thousand in expectation, and perfect information would be worth up to $120 thousand.',
+      },
+      {
+        title: 'Break-even probability',
+        given: ['Same gamble: gain $500, loss $200'],
+        steps: ['p* = 200 / (500 + 200) = 28.57%'],
+        result: 'The launch has a positive EMV if the chance of success exceeds 28.57%; the 40% estimate leaves a margin.',
+      },
+    ],
+  },
+};
+
+export const questions: Record<string, QuestionText> = {
+  l26q1: {
+    concept: 'The five forces',
+    prompt: 'Which of the following is NOT one of Porter\'s five forces?',
+    options: [
+      { text: 'Threat of new entrants', why: 'This is one of the five forces.' },
+      { text: 'Bargaining power of suppliers', why: 'This is one of the five forces.' },
+      { text: 'Threat of substitutes', why: 'This is one of the five forces.' },
+      { text: 'Employee satisfaction', why: 'Correct - it can matter for execution, but it is not one of the five structural forces.' },
+    ],
+    explanation: 'The five forces are new entrants, supplier power, buyer power, substitutes and rivalry among existing competitors.',
+  },
+  l26q2: { concept: 'Concentration ratio', prompt: 'The five largest firms in a market have shares of 35%, 25%, 15%, 10% and 5%. What is the four-firm concentration ratio (%)?', explanation: 'CR4 = 35 + 25 + 15 + 10 = 85%.' },
+  l26q3: { concept: 'HHI', prompt: 'Four firms have market shares of 40%, 30%, 20% and 10%. What is the HHI?', explanation: '1,600 + 900 + 400 + 100 = 3,000.', commonMistake: 'Adding the shares (100) instead of squaring them first.' },
+  l26q4: { concept: 'HHI after a merger', prompt: 'In the same market, the firms with 20% and 10% merge. What is the new HHI?', explanation: 'Shares become 40, 30 and 30: 1,600 + 900 + 900 = 3,400. (The increase is 2 x 20 x 10 = 400.)' },
+  l26q5: {
+    concept: 'Buyer power',
+    prompt: 'In which situation do buyers have the strongest bargaining power?',
+    options: [
+      { text: 'Many small buyers, a unique product and high switching costs', why: 'These conditions weaken buyer power.' },
+      { text: 'A few large buyers purchasing standard products with low switching costs', why: 'Correct - concentrated buyers with easy alternatives can force prices down.' },
+      { text: 'A product that is a small part of the buyer\'s costs', why: 'Buyers are less price-sensitive when the item is a small cost.' },
+      { text: 'Buyers who cannot integrate backward and have no alternatives', why: 'Lack of alternatives reduces their power.' },
+    ],
+    explanation: 'Buyer power rises with concentration, standardised products, low switching costs and the credible threat of backward integration.',
+  },
+  l26w1: {
+    concept: 'Assessing industry attractiveness',
+    scenario: 'An online grocery delivery market has four firms with shares of 40%, 30%, 20% and 10%. Costs for warehouses and delivery fleets are high and largely fixed. Shoppers can switch apps freely. A few global brands supply most of the products. Supermarkets offer a close substitute with their own delivery services. A small firm with a 10% share is deciding whether to invest heavily to grow.',
+    prompt: 'Write a short analysis (4-6 sentences). Assess the five forces, state what the concentration implies, judge the attractiveness of the industry and recommend what the 10% firm should do.',
+    explanation: 'Self-assess against the rubric after writing your own answer; compare with the model answer.',
+    modelAnswer: 'The HHI is 1,600 + 900 + 400 + 100 = 3,000, so rivalry is among a few firms, but high fixed costs and free switching make price competition intense. Buyer power is high because switching is costless; supplier power is high because a few global brands control key products; the substitute of supermarkets with delivery caps prices; entry is deterred by the capital needed for logistics, which is the one force that protects profit. On balance the industry looks structurally unattractive for margins, so growth alone will not make the 10% firm profitable. I would not invest to chase share head-on against larger firms with scale advantages in logistics. Instead the firm should seek a focused niche (for example a region or a premium segment) where it can differentiate, test its unit economics, or consider a partnership or sale.',
+    rubric: [
+      'Assesses at least four of the five forces with evidence from the case.',
+      'Computes or interprets the concentration (HHI 3,000) and links it to rivalry.',
+      'Judges the overall attractiveness of the industry and explains why.',
+      'Makes a clear recommendation for the 10% firm.',
+      'Notes a limit of the analysis or suggests a differentiated or focused alternative.',
+    ],
+  },
+  l27q1: {
+    concept: 'Generic strategies',
+    prompt: 'Which description best fits a cost-leadership strategy?',
+    options: [
+      { text: 'Offering a comparable product at the lowest cost in the industry', why: 'Correct - cost leadership is lowest cost for an acceptable, comparable offer.' },
+      { text: 'Charging a premium for a unique product', why: 'This describes differentiation.' },
+      { text: 'Serving only a narrow niche', why: 'This describes focus, which could be cost-based or differentiated.' },
+      { text: 'Matching every competitor\'s moves', why: 'Imitation is not a strategy of lowest cost.' },
+    ],
+    explanation: 'Cost leaders pursue scale, learning and process efficiency so that they can price at or below rivals and still earn a margin.',
+  },
+  l27q2: { concept: 'Experience curve', prompt: 'The first unit costs $100 and the learning rate is 80% (cost falls to 80% each time cumulative output doubles). What does a unit cost after 4 units of cumulative output ($)?', explanation: '2 units: 100 x 0.8 = 80. 4 units: 80 x 0.8 = $64.' },
+  l27q3: { concept: 'Experience curve', prompt: 'With the same learning rate (80%), what does a unit cost after 8 units of cumulative output ($)?', explanation: '64 x 0.8 = $51.20.' },
+  l27q4: { concept: 'Price premium for differentiation', prompt: 'A rival sells at $80 with a unit cost of $50. A differentiator has a unit cost of $60. What percentage price premium over the rival does it need to earn the same unit margin?', explanation: 'The rival margin is $30, so the differentiator needs a price of 60 + 30 = $90. Premium = 90 / 80 - 1 = 12.5%.' },
+  l27q5: {
+    concept: 'VRIO',
+    scenario: 'A firm\'s distinctive resource is its modern warehouse. It is valuable, but competitors can build equally good warehouses within a year.',
+    prompt: 'What does VRIO imply about this resource?',
+    options: [
+      { text: 'It gives a sustained advantage because it is valuable', why: 'Value alone gives only parity if rivals can match it.' },
+      { text: 'It is worthless', why: 'It is valuable; it simply does not differentiate.' },
+      { text: 'It gives at best temporary advantage because it is not costly to imitate', why: 'Correct - without being rare and costly to imitate, the resource supports parity, not sustained advantage.' },
+      { text: 'It is rare, so it gives a sustained advantage', why: 'The case says competitors can build equal warehouses, so it is not rare.' },
+    ],
+    explanation: 'Sustained advantage requires all four VRIO conditions. A valuable but easily imitated resource gives competitive parity or a short-lived edge.',
+  },
+  l27q6: {
+    concept: 'Stuck in the middle',
+    scenario: 'A mid-sized airline offers fares above the budget carriers\' but without the premium service of the full-service carriers. Its costs are higher than the budget carriers\' and its quality is lower than the full-service carriers\'. It is losing both business and leisure customers.',
+    prompt: 'What strategic diagnosis fits best?',
+    options: [
+      { text: 'It is a cost leader and should raise quality', why: 'Its costs are higher than the budget carriers\', so it is not a cost leader.' },
+      { text: 'It is stuck in the middle with neither a cost nor a differentiation advantage, and should commit to one clear position', why: 'Correct - without a clear advantage it is outcompeted on both dimensions.' },
+      { text: 'It should lower fares and raise service together', why: 'Pursuing both increases costs and rarely resolves the problem.' },
+      { text: 'It should wait for the market to improve', why: 'The problem is positional, not cyclical.' },
+    ],
+    explanation: 'Firms without a distinctive low-cost or differentiated position tend to earn below-average returns; choosing a clear position is the usual remedy.',
+  },
+  l28q1: {
+    concept: 'Growth-share matrix',
+    prompt: 'A business unit has a small relative market share in a fast-growing market. How is it classified in the growth-share matrix?',
+    options: [
+      { text: 'Cash cow', why: 'Cash cows have high share in low-growth markets.' },
+      { text: 'Star', why: 'Stars have high share in high-growth markets.' },
+      { text: 'Question mark', why: 'Correct - high growth with low share needs heavy investment to build share, or should be sold.' },
+      { text: 'Dog', why: 'Dogs have low share in low-growth markets.' },
+    ],
+    explanation: 'Fast-growing market with low share is a question mark: it consumes cash and must be built or divested.',
+  },
+  l28q2: { concept: 'Relative market share', prompt: 'A business has a 15% market share and the largest competitor has 30%. What is its relative market share?', explanation: '15 / 30 = 0.5.' },
+  l28q3: { concept: 'Value of an acquisition', prompt: 'A target\'s standalone value is $500 million, synergies are worth $150 million and the buyer pays $600 million. What is the net gain to the buyer ($ million)?', explanation: '500 + 150 - 600 = $50 million (synergies of 150 less a premium of 100).' },
+  l28q4: { concept: 'Maximum acquisition premium', prompt: 'The standalone value of a target is $500 million and synergies are worth $150 million. What is the largest premium (%) over standalone value the buyer can pay without losing value?', explanation: 'Maximum price = 650. Premium = 150 / 500 = 30%.' },
+  l28q5: {
+    concept: 'Acquisition value',
+    prompt: 'Why do many acquisitions fail to create value for the buyer?',
+    options: [
+      { text: 'The premium paid often absorbs most or all of the synergies, which are also uncertain', why: 'Correct - the buyer gains only if captured synergies exceed the premium.' },
+      { text: 'Targets are always overvalued by their own managers', why: 'This is not a general rule.' },
+      { text: 'Synergies are certain, but regulators prevent them', why: 'Synergies are uncertain, not certain.' },
+      { text: 'Acquisitions only destroy value if they are paid for with debt', why: 'The method of payment is not the main reason.' },
+    ],
+    explanation: 'The buyer\'s gain is synergies minus premium. Competitive bidding and optimism about synergies leave little or nothing for the buyer.',
+  },
+  l28w1: {
+    concept: 'Acquisition under uncertain synergies',
+    scenario: 'A company can buy a target with a standalone value of $500 million for $600 million. Management expects synergies worth $150 million, but analysts believe there is a 60% chance of reaching $150 million and a 40% chance that only $30 million is achieved.',
+    prompt: 'Write a short recommendation (4-6 sentences). Compute the premium and the expected gain, assess the downside, and recommend a course of action.',
+    explanation: 'Self-assess against the rubric after writing your own answer; compare with the model answer.',
+    modelAnswer: 'The premium is $600 million minus $500 million, or $100 million. Expected synergies are 0.6 x 150 + 0.4 x 30 = 90 + 12 = $102 million, so the expected gain is only 102 - 100 = $2 million, which is negligible given the uncertainty. If synergies reach $150 million the gain is $50 million, but in the low case the buyer loses 30 - 100 = $70 million. The risk-return profile is poor: a 40% chance of a $70 million loss for an expected gain of $2 million. I would not pay $600 million. I would try to negotiate a lower price or structure part of the payment as an earn-out tied to the synergies, and do a more rigorous check of how realistic the $150 million is.',
+    rubric: [
+      'Computes the premium ($100 million).',
+      'Computes the expected synergies ($102 million) and the expected gain ($2 million).',
+      'Evaluates the downside case (loss of $70 million) and its probability.',
+      'Concludes that the deal is unattractive at this price.',
+      'Suggests a practical alternative such as a lower price, earn-out or further due diligence.',
+    ],
+  },
+  l29q1: {
+    concept: 'Expected monetary value',
+    prompt: 'What does the expected monetary value (EMV) of a decision represent?',
+    options: [
+      { text: 'The most likely payoff', why: 'EMV is a probability-weighted average, not the most likely outcome.' },
+      { text: 'The probability-weighted average of all possible payoffs', why: 'Correct - it sums each payoff times its probability.' },
+      { text: 'The best possible payoff', why: 'That is the optimistic case, not the expected value.' },
+      { text: 'The payoff in the worst case', why: 'That is the maximin criterion.' },
+    ],
+    explanation: 'EMV = sum of probability times payoff across all outcomes; it measures the average result over many repetitions.',
+  },
+  l29q2: { concept: 'EMV', prompt: 'A launch has a 40% chance of a $500 thousand gain and a 60% chance of a $200 thousand loss. What is its EMV ($ thousand)?', explanation: '0.4 x 500 + 0.6 x (-200) = 200 - 120 = $80 thousand.' },
+  l29q3: { concept: 'Value of perfect information', prompt: 'For the same launch (not launching pays $0), what is the expected value of perfect information ($ thousand)?', explanation: 'With perfect information you launch only when it succeeds: 0.4 x 500 + 0.6 x 0 = 200. EVPI = 200 - 80 = $120 thousand.' },
+  l29q4: { concept: 'Break-even probability', prompt: 'A gamble pays a $500 thousand gain or a $200 thousand loss. What probability of success (%) gives an EMV of zero?', explanation: 'p* = 200 / (500 + 200) = 28.57%.' },
+  l29q5: {
+    concept: 'Limits of EMV',
+    prompt: 'When may a firm reasonably reject a project with a positive EMV?',
+    options: [
+      { text: 'Never; EMV is always the right criterion', why: 'EMV assumes the firm can bear the downside and repeat the bet.' },
+      { text: 'Only if the probabilities are exactly known', why: 'Uncertainty about probabilities is a reason for care, not the only one.' },
+      { text: 'Only if the project is small', why: 'Size alone does not justify rejection.' },
+      { text: 'If the possible loss could threaten the firm\'s survival and the decision cannot be repeated', why: 'Correct - risk of ruin and one-off decisions make averages misleading.' },
+    ],
+    explanation: 'EMV is a good guide when losses are affordable and decisions repeat. A single bet that could be fatal needs to be judged on the downside as well as the average.',
+  },
+  l29q6: {
+    concept: 'Value of a pilot study',
+    scenario: 'The same launch has a 40% chance of a $500 thousand gain and a 60% chance of a $200 thousand loss. A pilot costing $20 thousand would reveal with certainty whether the launch will succeed.',
+    prompt: 'By how much does the pilot improve expected profit compared with deciding without it ($ thousand)?',
+    explanation: 'Without the pilot the best choice is to launch with EMV $80 thousand. With the pilot you launch only on success: expected value 0.4 x 500 = 200, less the pilot cost of 20 gives $180 thousand. The improvement is 180 - 80 = $100 thousand.',
+  },
+};
