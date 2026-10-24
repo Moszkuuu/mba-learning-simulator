@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l26-industry-analysis', number: 26, unitId: 'st-u1', minutes: 14, competencies: ['st.industry'], status: 'foundation' },
-  { id: 'l27-competitive-advantage', number: 27, unitId: 'st-u1', minutes: 14, competencies: ['st.advantage'], status: 'foundation' },
-  { id: 'l28-corporate-strategy', number: 28, unitId: 'st-u2', minutes: 15, competencies: ['st.corporate'], status: 'foundation' },
-  { id: 'l29-decisions-uncertainty', number: 29, unitId: 'st-u2', minutes: 15, competencies: ['st.uncertainty'], status: 'foundation' },
+  { id: 'l26-industry-analysis', number: 38, unitId: 'st-u1', minutes: 14, competencies: ['st.industry'], status: 'foundation' },
+  { id: 'l27-competitive-advantage', number: 39, unitId: 'st-u1', minutes: 14, competencies: ['st.advantage'], status: 'foundation' },
+  { id: 'l28-corporate-strategy', number: 40, unitId: 'st-u2', minutes: 15, competencies: ['st.corporate'], status: 'foundation' },
+  { id: 'l29-decisions-uncertainty', number: 41, unitId: 'st-u2', minutes: 15, competencies: ['st.uncertainty'], status: 'foundation' },
 ];
 
 const IN = 'st.industry', AD = 'st.advantage', CO = 'st.corporate', UN = 'st.uncertainty';

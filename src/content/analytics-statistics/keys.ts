@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l34-descriptive-statistics', number: 34, unitId: 'as-u1', minutes: 13, competencies: ['as.descriptive'], status: 'foundation' },
-  { id: 'l35-probability', number: 35, unitId: 'as-u1', minutes: 15, competencies: ['as.probability'], status: 'foundation' },
-  { id: 'l36-inference', number: 36, unitId: 'as-u2', minutes: 16, competencies: ['as.inference'], status: 'foundation' },
-  { id: 'l37-regression-forecasting', number: 37, unitId: 'as-u2', minutes: 16, competencies: ['as.regression'], status: 'foundation' },
+  { id: 'l34-descriptive-statistics', number: 46, unitId: 'as-u1', minutes: 13, competencies: ['as.descriptive'], status: 'foundation' },
+  { id: 'l35-probability', number: 47, unitId: 'as-u1', minutes: 15, competencies: ['as.probability'], status: 'foundation' },
+  { id: 'l36-inference', number: 48, unitId: 'as-u2', minutes: 16, competencies: ['as.inference'], status: 'foundation' },
+  { id: 'l37-regression-forecasting', number: 49, unitId: 'as-u2', minutes: 16, competencies: ['as.regression'], status: 'foundation' },
 ];
 
 const DE = 'as.descriptive', PR = 'as.probability', IN = 'as.inference', RE = 'as.regression';

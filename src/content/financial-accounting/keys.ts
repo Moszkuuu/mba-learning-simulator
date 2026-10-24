@@ -1,13 +1,26 @@
 ﻿import type { LessonKey, QuestionKey } from '../types';
+import { NEW_QUESTION_KEYS } from './keys-new';
 
 /** Language-neutral structure and answer keys for Financial Accounting. Shared by EN and TH. */
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l1-gross-profit', number: 1, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
-  { id: 'l2-operating-profit', number: 2, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
-  { id: 'l3-ar-ap', number: 3, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
-  { id: 'l4-inventory-wc', number: 4, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
-  { id: 'l5-operating-cash-flow', number: 5, unitId: 'u7-cash-flow', minutes: 12, competencies: ['fa.cash-flow'], status: 'migrated' },
-  { id: 'l6-break-even', number: 6, unitId: 'applications', minutes: 12, competencies: ['ma.cvp'], status: 'migrated' },
+  { id: 'l47-accounting-equation', number: 1, unitId: 'u1-foundations', minutes: 12, competencies: ['fa.double-entry'], status: 'foundation' },
+  { id: 'l48-double-entry', number: 2, unitId: 'u1-foundations', minutes: 14, competencies: ['fa.double-entry'], status: 'foundation' },
+  { id: 'l49-accrual-recognition', number: 3, unitId: 'u2-accrual', minutes: 13, competencies: ['fa.accrual'], status: 'foundation' },
+  { id: 'l50-adjusting-entries', number: 4, unitId: 'u2-accrual', minutes: 13, competencies: ['fa.accrual'], status: 'foundation' },
+  { id: 'l1-gross-profit', number: 5, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
+  { id: 'l2-operating-profit', number: 6, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
+  { id: 'l3-ar-ap', number: 7, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
+  { id: 'l4-inventory-wc', number: 8, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
+  { id: 'l51-inventory-costing', number: 9, unitId: 'u5-inventory', minutes: 14, competencies: ['fa.inventory-valuation'], status: 'foundation' },
+  { id: 'l52-inventory-nrv-errors', number: 10, unitId: 'u5-inventory', minutes: 13, competencies: ['fa.inventory-valuation'], status: 'foundation' },
+  { id: 'l53-depreciation', number: 11, unitId: 'u6-assets-financing', minutes: 14, competencies: ['fa.long-lived-assets'], status: 'foundation' },
+  { id: 'l54-debt-equity', number: 12, unitId: 'u6-assets-financing', minutes: 14, competencies: ['fa.liabilities-equity'], status: 'foundation' },
+  { id: 'l5-operating-cash-flow', number: 13, unitId: 'u7-cash-flow', minutes: 12, competencies: ['fa.cash-flow'], status: 'migrated' },
+  { id: 'l55-ratios-liquidity-profitability', number: 14, unitId: 'u8-analysis', minutes: 14, competencies: ['fa.ratio-analysis'], status: 'foundation' },
+  { id: 'l56-ratios-efficiency-trend', number: 15, unitId: 'u8-analysis', minutes: 14, competencies: ['fa.ratio-analysis'], status: 'foundation' },
+  { id: 'l57-earnings-quality', number: 16, unitId: 'u9-earnings-quality', minutes: 15, competencies: ['fa.earnings-quality'], status: 'foundation' },
+  { id: 'l58-comparing-policies', number: 17, unitId: 'u9-earnings-quality', minutes: 15, competencies: ['fa.earnings-quality'], status: 'foundation' },
+  { id: 'l6-break-even', number: 18, unitId: 'applications', minutes: 12, competencies: ['ma.cvp'], status: 'migrated' },
 ];
 
 const FS = 'fa.financial-statements';
@@ -16,6 +29,7 @@ const CF = 'fa.cash-flow';
 const CVP = 'ma.cvp';
 
 export const QUESTION_KEYS: QuestionKey[] = [
+  ...NEW_QUESTION_KEYS,
   // Lesson 1
   { id: 'l1q1', lessonId: 'l1-gross-profit', level: 1, competency: FS, type: 'mcq', correctIndex: 0, optionCount: 4 },
   { id: 'l1q2', lessonId: 'l1-gross-profit', level: 1, competency: FS, type: 'numeric', answer: 157_500, unit: 'usd' },

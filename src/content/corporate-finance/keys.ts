@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l11-time-value', number: 11, unitId: 'cf-u1', minutes: 15, competencies: ['cf.tvm'], status: 'foundation' },
-  { id: 'l12-investment-appraisal', number: 12, unitId: 'cf-u2', minutes: 16, competencies: ['cf.appraisal'], status: 'foundation' },
-  { id: 'l13-cost-of-capital', number: 13, unitId: 'cf-u3', minutes: 14, competencies: ['cf.cost-of-capital'], status: 'foundation' },
-  { id: 'l14-valuation', number: 14, unitId: 'cf-u3', minutes: 16, competencies: ['cf.valuation'], status: 'foundation' },
+  { id: 'l11-time-value', number: 23, unitId: 'cf-u1', minutes: 15, competencies: ['cf.tvm'], status: 'foundation' },
+  { id: 'l12-investment-appraisal', number: 24, unitId: 'cf-u2', minutes: 16, competencies: ['cf.appraisal'], status: 'foundation' },
+  { id: 'l13-cost-of-capital', number: 25, unitId: 'cf-u3', minutes: 14, competencies: ['cf.cost-of-capital'], status: 'foundation' },
+  { id: 'l14-valuation', number: 26, unitId: 'cf-u3', minutes: 16, competencies: ['cf.valuation'], status: 'foundation' },
 ];
 
 const TV = 'cf.tvm', AP = 'cf.appraisal', CC = 'cf.cost-of-capital', VA = 'cf.valuation';

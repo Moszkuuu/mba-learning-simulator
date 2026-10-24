@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l22-process-analysis', number: 22, unitId: 'op-u1', minutes: 14, competencies: ['op.process'], status: 'foundation' },
-  { id: 'l23-inventory-models', number: 23, unitId: 'op-u1', minutes: 15, competencies: ['op.inventory'], status: 'foundation' },
-  { id: 'l24-capacity-queues', number: 24, unitId: 'op-u2', minutes: 15, competencies: ['op.capacity-queues'], status: 'foundation' },
-  { id: 'l25-quality', number: 25, unitId: 'op-u2', minutes: 14, competencies: ['op.quality'], status: 'foundation' },
+  { id: 'l22-process-analysis', number: 34, unitId: 'op-u1', minutes: 14, competencies: ['op.process'], status: 'foundation' },
+  { id: 'l23-inventory-models', number: 35, unitId: 'op-u1', minutes: 15, competencies: ['op.inventory'], status: 'foundation' },
+  { id: 'l24-capacity-queues', number: 36, unitId: 'op-u2', minutes: 15, competencies: ['op.capacity-queues'], status: 'foundation' },
+  { id: 'l25-quality', number: 37, unitId: 'op-u2', minutes: 14, competencies: ['op.quality'], status: 'foundation' },
 ];
 
 const PR = 'op.process', IN = 'op.inventory', CQ = 'op.capacity-queues', QU = 'op.quality';

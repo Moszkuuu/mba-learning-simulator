@@ -1,9 +1,9 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l44-ethics-stakeholders', number: 44, unitId: 'eg-u1', minutes: 14, competencies: ['eg.ethics'], status: 'foundation' },
-  { id: 'l45-corporate-governance', number: 45, unitId: 'eg-u1', minutes: 14, competencies: ['eg.governance'], status: 'foundation' },
-  { id: 'l46-risk-management', number: 46, unitId: 'eg-u2', minutes: 15, competencies: ['eg.risk'], status: 'foundation' },
+  { id: 'l44-ethics-stakeholders', number: 56, unitId: 'eg-u1', minutes: 14, competencies: ['eg.ethics'], status: 'foundation' },
+  { id: 'l45-corporate-governance', number: 57, unitId: 'eg-u1', minutes: 14, competencies: ['eg.governance'], status: 'foundation' },
+  { id: 'l46-risk-management', number: 58, unitId: 'eg-u2', minutes: 15, competencies: ['eg.risk'], status: 'foundation' },
 ];
 
 const ET = 'eg.ethics', GO = 'eg.governance', RI = 'eg.risk';

@@ -102,16 +102,16 @@ export interface Competency {
 const C = (id: string, subjectId: string, en: string, th: string, available: boolean): Competency => ({ id, subjectId, name: { en, th }, available });
 
 export const COMPETENCIES: Competency[] = [
-  C('fa.accrual', 'financial-accounting', 'Accrual accounting and recognition', 'การบัญชีเกณฑ์คงค้างและการรับรู้รายการ', false),
-  C('fa.double-entry', 'financial-accounting', 'Accounting equation and double entry', 'สมการบัญชีและการบันทึกบัญชีคู่', false),
+  C('fa.accrual', 'financial-accounting', 'Accrual accounting and recognition', 'การบัญชีเกณฑ์คงค้างและการรับรู้รายการ', true),
+  C('fa.double-entry', 'financial-accounting', 'Accounting equation and double entry', 'สมการบัญชีและการบันทึกบัญชีคู่', true),
   C('fa.financial-statements', 'financial-accounting', 'Income statement and margins', 'งบกำไรขาดทุนและอัตรากำไร', true),
   C('fa.working-capital', 'financial-accounting', 'Working capital', 'เงินทุนหมุนเวียน', true),
-  C('fa.inventory-valuation', 'financial-accounting', 'Inventory valuation', 'การวัดมูลค่าสินค้าคงเหลือ', false),
-  C('fa.long-lived-assets', 'financial-accounting', 'Long-lived assets and depreciation', 'สินทรัพย์ระยะยาวและค่าเสื่อมราคา', false),
-  C('fa.liabilities-equity', 'financial-accounting', 'Liabilities and equity', 'หนี้สินและส่วนของเจ้าของ', false),
+  C('fa.inventory-valuation', 'financial-accounting', 'Inventory valuation', 'การวัดมูลค่าสินค้าคงเหลือ', true),
+  C('fa.long-lived-assets', 'financial-accounting', 'Long-lived assets and depreciation', 'สินทรัพย์ระยะยาวและค่าเสื่อมราคา', true),
+  C('fa.liabilities-equity', 'financial-accounting', 'Liabilities and equity', 'หนี้สินและส่วนของเจ้าของ', true),
   C('fa.cash-flow', 'financial-accounting', 'Cash flow analysis', 'การวิเคราะห์กระแสเงินสด', true),
-  C('fa.ratio-analysis', 'financial-accounting', 'Ratio analysis', 'การวิเคราะห์อัตราส่วนทางการเงิน', false),
-  C('fa.earnings-quality', 'financial-accounting', 'Earnings quality and statement analysis', 'คุณภาพกำไรและการวิเคราะห์งบการเงิน', false),
+  C('fa.ratio-analysis', 'financial-accounting', 'Ratio analysis', 'การวิเคราะห์อัตราส่วนทางการเงิน', true),
+  C('fa.earnings-quality', 'financial-accounting', 'Earnings quality and statement analysis', 'คุณภาพกำไรและการวิเคราะห์งบการเงิน', true),
   C('ma.cost-behaviour', 'managerial-accounting', 'Cost behaviour and classification', 'พฤติกรรมต้นทุนและการจำแนกต้นทุน', true),
   C('ma.cvp', 'managerial-accounting', 'Cost-volume-profit and break-even', 'ความสัมพันธ์ต้นทุน-ปริมาณ-กำไรและจุดคุ้มทุน', true),
   C('ma.costing', 'managerial-accounting', 'Product costing and overhead', 'การคิดต้นทุนผลิตภัณฑ์และค่าใช้จ่ายการผลิตรวม', true),

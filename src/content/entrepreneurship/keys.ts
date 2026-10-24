@@ -1,9 +1,9 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l38-validating-ideas', number: 38, unitId: 'en-u1', minutes: 14, competencies: ['en.lean'], status: 'foundation' },
-  { id: 'l39-unit-economics-runway', number: 39, unitId: 'en-u2', minutes: 14, competencies: ['en.unit-economics'], status: 'foundation' },
-  { id: 'l40-funding-dilution', number: 40, unitId: 'en-u2', minutes: 15, competencies: ['en.funding'], status: 'foundation' },
+  { id: 'l38-validating-ideas', number: 50, unitId: 'en-u1', minutes: 14, competencies: ['en.lean'], status: 'foundation' },
+  { id: 'l39-unit-economics-runway', number: 51, unitId: 'en-u2', minutes: 14, competencies: ['en.unit-economics'], status: 'foundation' },
+  { id: 'l40-funding-dilution', number: 52, unitId: 'en-u2', minutes: 15, competencies: ['en.funding'], status: 'foundation' },
 ];
 
 const LE = 'en.lean', UE = 'en.unit-economics', FU = 'en.funding';

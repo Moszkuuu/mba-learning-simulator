@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l7-cost-behaviour', number: 7, unitId: 'ma-u1', minutes: 14, competencies: ['ma.cost-behaviour'], status: 'foundation' },
-  { id: 'l8-product-costing', number: 8, unitId: 'ma-u2', minutes: 14, competencies: ['ma.costing'], status: 'foundation' },
-  { id: 'l9-budgets-variances', number: 9, unitId: 'ma-u3', minutes: 14, competencies: ['ma.budgeting'], status: 'foundation' },
-  { id: 'l10-relevant-costs', number: 10, unitId: 'ma-u4', minutes: 14, competencies: ['ma.relevant-costs'], status: 'foundation' },
+  { id: 'l7-cost-behaviour', number: 19, unitId: 'ma-u1', minutes: 14, competencies: ['ma.cost-behaviour'], status: 'foundation' },
+  { id: 'l8-product-costing', number: 20, unitId: 'ma-u2', minutes: 14, competencies: ['ma.costing'], status: 'foundation' },
+  { id: 'l9-budgets-variances', number: 21, unitId: 'ma-u3', minutes: 14, competencies: ['ma.budgeting'], status: 'foundation' },
+  { id: 'l10-relevant-costs', number: 22, unitId: 'ma-u4', minutes: 14, competencies: ['ma.relevant-costs'], status: 'foundation' },
 ];
 
 const CB = 'ma.cost-behaviour', CO = 'ma.costing', BU = 'ma.budgeting', RC = 'ma.relevant-costs';

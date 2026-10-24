@@ -1,9 +1,9 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l41-exchange-rates', number: 41, unitId: 'ib-u1', minutes: 14, competencies: ['ib.fx'], status: 'foundation' },
-  { id: 'l42-trade-advantage', number: 42, unitId: 'ib-u1', minutes: 13, competencies: ['ib.trade'], status: 'foundation' },
-  { id: 'l43-market-entry-risk', number: 43, unitId: 'ib-u2', minutes: 15, competencies: ['ib.entry'], status: 'foundation' },
+  { id: 'l41-exchange-rates', number: 53, unitId: 'ib-u1', minutes: 14, competencies: ['ib.fx'], status: 'foundation' },
+  { id: 'l42-trade-advantage', number: 54, unitId: 'ib-u1', minutes: 13, competencies: ['ib.trade'], status: 'foundation' },
+  { id: 'l43-market-entry-risk', number: 55, unitId: 'ib-u2', minutes: 15, competencies: ['ib.entry'], status: 'foundation' },
 ];
 
 const FX = 'ib.fx', TR = 'ib.trade', EN = 'ib.entry';

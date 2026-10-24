@@ -217,3 +217,7 @@ Lessons are marked "foundation" (not "full"): each has objectives, theory, formu
 1. **Thai review:** are you able to have a Thai reader check finance terminology, or should I mark all Thai content "draft - machine-assisted" until then?
 2. **Pace:** proceed with Phase 2 (architecture) next, as the plan suggests?
 3. **Further reading:** OK to restrict to a short list of sources I can verify online (open textbooks and official standards bodies), even if shorter than a typical syllabus?
+
+## Update: Financial Accounting completed to 18 lessons
+
+Twelve lessons (l47-l58) were added so every Financial Accounting unit is now teachable: foundations and double entry, accruals and adjusting entries, inventory costing and NRV, depreciation, debt and equity, ratio analysis (two lessons), earnings quality and policy comparison. Each has 6 questions (levels 1-3, with written Level 3 cases where applicable). Lessons are renumbered 1-18 in programme order (other subjects' numbers shift by 12; lesson ids are unchanged, so saved progress is unaffected). All seven previously "Planned" Financial Accounting competencies are now available. The new lessons are status "foundation"; Thai text is an unreviewed draft.

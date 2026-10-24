@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l30-motivation', number: 30, unitId: 'ob-u1', minutes: 14, competencies: ['ob.motivation'], status: 'foundation' },
-  { id: 'l31-teams', number: 31, unitId: 'ob-u2', minutes: 13, competencies: ['ob.teams'], status: 'foundation' },
-  { id: 'l32-leadership', number: 32, unitId: 'ob-u2', minutes: 14, competencies: ['ob.leadership'], status: 'foundation' },
-  { id: 'l33-change', number: 33, unitId: 'ob-u2', minutes: 14, competencies: ['ob.change'], status: 'foundation' },
+  { id: 'l30-motivation', number: 42, unitId: 'ob-u1', minutes: 14, competencies: ['ob.motivation'], status: 'foundation' },
+  { id: 'l31-teams', number: 43, unitId: 'ob-u2', minutes: 13, competencies: ['ob.teams'], status: 'foundation' },
+  { id: 'l32-leadership', number: 44, unitId: 'ob-u2', minutes: 14, competencies: ['ob.leadership'], status: 'foundation' },
+  { id: 'l33-change', number: 45, unitId: 'ob-u2', minutes: 14, competencies: ['ob.change'], status: 'foundation' },
 ];
 
 const MO = 'ob.motivation', TE = 'ob.teams', LE = 'ob.leadership', CH = 'ob.change';

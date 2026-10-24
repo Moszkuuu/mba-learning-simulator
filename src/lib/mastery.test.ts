@@ -62,8 +62,8 @@ describe('mastery', () => {
   it('reports unmet available prerequisites only', () => {
     const none = ['fa.financial-statements', 'fa.working-capital', 'fa.cash-flow'].map((c) => competencyStat([], c, now));
     expect(unmetPrerequisites('fa.cash-flow', none)).toEqual([WC]);
-    // fa.financial-statements requires fa.double-entry, which is not available yet -> ignored
-    expect(unmetPrerequisites('fa.financial-statements', none)).toEqual([]);
+    // fa.financial-statements requires fa.double-entry, which is now taught and available
+    expect(unmetPrerequisites('fa.financial-statements', none)).toEqual(['fa.double-entry']);
   });
 });
 

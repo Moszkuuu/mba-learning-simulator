@@ -1,10 +1,10 @@
 import type { LessonKey, QuestionKey } from '../types';
 
 export const LESSON_KEYS: LessonKey[] = [
-  { id: 'l15-demand-elasticity', number: 15, unitId: 'me-u1', minutes: 14, competencies: ['me.demand'], status: 'foundation' },
-  { id: 'l16-costs-marginal', number: 16, unitId: 'me-u2', minutes: 14, competencies: ['me.costs-marginal'], status: 'foundation' },
-  { id: 'l17-market-structure', number: 17, unitId: 'me-u3', minutes: 14, competencies: ['me.market-structure'], status: 'foundation' },
-  { id: 'l18-game-theory', number: 18, unitId: 'me-u3', minutes: 15, competencies: ['me.game-theory'], status: 'foundation' },
+  { id: 'l15-demand-elasticity', number: 27, unitId: 'me-u1', minutes: 14, competencies: ['me.demand'], status: 'foundation' },
+  { id: 'l16-costs-marginal', number: 28, unitId: 'me-u2', minutes: 14, competencies: ['me.costs-marginal'], status: 'foundation' },
+  { id: 'l17-market-structure', number: 29, unitId: 'me-u3', minutes: 14, competencies: ['me.market-structure'], status: 'foundation' },
+  { id: 'l18-game-theory', number: 30, unitId: 'me-u3', minutes: 15, competencies: ['me.game-theory'], status: 'foundation' },
 ];
 
 const D = 'me.demand', MC = 'me.costs-marginal', MS = 'me.market-structure', GT = 'me.game-theory';

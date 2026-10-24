@@ -1,4 +1,5 @@
 ﻿import type { LessonText, QuestionText } from '../types';
+import { newLessons, newQuestions } from './th-new';
 
 /**
  * Thai text. DRAFT - not reviewed by a fluent finance-literate Thai reader.
@@ -395,3 +396,6 @@ export const questions: Record<string, QuestionText> = {
   c2q2: { concept: 'กรณีศึกษา: กำไรเป้าหมาย', scenario: CASE2 + ' เจ้าของต้องการกำไร $9,000 ต่อเดือน', prompt: 'ต้องขายกี่ถุงเพื่อให้ได้กำไร $9,000 ต่อเดือน', explanation: '(18,000 + 9,000) / 4.50 = 6,000 ถุง' },
   c2q3: { concept: 'กรณีศึกษา: ต้นทุนผันแปรเพิ่มขึ้น', scenario: 'กรณีศึกษา - Ridge Roastery: ราคา $12 ต้นทุนคงที่ $18,000 ต่อเดือน ผู้ขายเมล็ดกาแฟดิบขึ้นต้นทุนผันแปรจาก $7.50 เป็น $8.00 ต่อถุง', prompt: 'หลังต้นทุนผันแปรเพิ่ม ปริมาณที่จุดคุ้มทุนใหม่ (ถุง) เป็นเท่าไร', explanation: 'CM ใหม่ = 12 - 8.00 = $4.00 จุดคุ้มทุน = 18,000 / 4.00 = 4,500 ถุง สูงขึ้น 12.5%' },
 };
+
+Object.assign(lessons, newLessons);
+Object.assign(questions, newQuestions);

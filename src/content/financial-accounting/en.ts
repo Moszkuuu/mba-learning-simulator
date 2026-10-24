@@ -1,4 +1,5 @@
 ﻿import type { LessonText, QuestionText } from '../types';
+import { newLessons, newQuestions } from './en-new';
 
 export const lessons: Record<string, LessonText> = {
   'l1-gross-profit': {
@@ -391,3 +392,6 @@ export const questions: Record<string, QuestionText> = {
   c2q2: { concept: 'Case: target profit', scenario: CASE2 + ' The owner wants a $9,000 monthly profit.', prompt: 'How many bags must be sold to earn $9,000 per month?', explanation: '(18,000 + 9,000) / 4.50 = 6,000 bags.' },
   c2q3: { concept: 'Case: cost shock', scenario: 'CASE - Ridge Roastery: price $12, fixed costs $18,000 per month. Its green-coffee supplier raises variable cost from $7.50 to $8.00 per bag.', prompt: 'After the cost increase, what is the new break-even volume (bags)?', explanation: 'New CM = 12 - 8.00 = $4.00. Break-even = 18,000 / 4.00 = 4,500 bags - 12.5% higher.' },
 };
+
+Object.assign(lessons, newLessons);
+Object.assign(questions, newQuestions);
