@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ProgressProvider } from './components/ProgressContext';
+import { ProgressProvider, useProgress } from './components/ProgressContext';
 import { I18nProvider, useI18n } from './i18n';
 import { useRoute } from './lib/router';
 import Dashboard from './pages/Dashboard';
@@ -10,7 +10,7 @@ import ReviewPage from './pages/ReviewPage';
 import SimulatorPage from './pages/SimulatorPage';
 import ProgressPage from './pages/ProgressPage';
 import GlossaryPage from './pages/GlossaryPage';
-import { Card, H2, LinkButton } from './components/ui';
+import { Alert, Card, H2, LinkButton } from './components/ui';
 import type { TKey } from './i18n/en';
 
 const NAV: { to: string; label: TKey }[] = [
@@ -57,6 +57,7 @@ function LangSwitch() {
 function Shell() {
   const path = useRoute();
   const { t } = useI18n();
+  const { storageIssue } = useProgress();
   const [open, setOpen] = useState(false);
   const active = (to: string) => (to === '/' ? path === '/' : path.startsWith(to) || (to === '/curriculum' && path.startsWith('/lesson/')));
 
@@ -84,7 +85,10 @@ function Shell() {
           </div>
         </header>
         {open && <nav id="mobile-nav" aria-label="Main" className="space-y-1 border-b border-slate-200 bg-white p-3 lg:hidden">{links}</nav>}
-        <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8"><Page path={path} /></main>
+        <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
+          {storageIssue && <div className="mb-4"><Alert tone="red" title={t('storage.title')}>{t(`storage.${storageIssue}` as 'storage.unavailable')} <a href="#/progress" className="font-semibold underline">{t('storage.goBackup')}</a></Alert></div>}
+          <Page path={path} />
+        </main>
         <footer className="mx-auto max-w-6xl px-4 pb-8 text-xs text-slate-500 sm:px-6 lg:hidden">{t('app.disclaimer')}</footer>
       </div>
     </div>

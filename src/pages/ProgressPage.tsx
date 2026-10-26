@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { getLessons, getQuestion } from '../content';
 import { COMPETENCIES, competencyById } from '../curriculum/program';
-import { competencyStats, parseProgress } from '../lib/progress';
+import { competencyStats } from '../lib/progress';
+import { backupFileName, commitImport, hasProgress, parseBackup, serializeBackup, summarizeProgress, type BackupResult } from '../lib/backup';
 import { useProgress } from '../components/ProgressContext';
 import { ActivityList } from '../components/ActivityList';
 import { Alert, Badge, Button, Card, H2, PageTitle, Link } from '../components/ui';
@@ -14,31 +15,59 @@ export default function ProgressPage() {
   const { progress, dispatch, replace } = useProgress();
   const { t, lang, date } = useI18n();
   const [confirming, setConfirming] = useState(false);
-  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [pending, setPending] = useState<{ fileName: string; result: Extract<BackupResult, { ok: true }> } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const lessons = getLessons(lang);
   const stats = competencyStats(progress);
   const wrong = [...progress.attempts].reverse().filter((a) => !a.correct).slice(0, 30);
 
   function exportJson() {
-    const blob = new Blob([JSON.stringify(progress, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `mba-lab-progress-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([serializeBackup(progress)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = backupFileName();
+      a.click();
+      URL.revokeObjectURL(url);
+      setMessage({ ok: true, text: t('backup.exported') });
+    } catch {
+      setMessage({ ok: false, text: t('backup.err.exportFail') });
+    }
   }
 
-  async function importJson(file: File | undefined) {
+  async function chooseFile(file: File | undefined) {
+    setPending(null);
+    setMessage(null);
     if (!file) return;
-    const text = await file.text();
-    const parsed = parseProgress(text);
-    const valid = parsed.attempts.length > 0 || parsed.completedLessons.length > 0 || parsed.simResults.length > 0;
-    if (!valid) { setImportMsg({ ok: false, text: t('prog.importFail') }); return; }
-    replace(parsed);
-    setImportMsg({ ok: true, text: t('prog.importOk') });
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      setMessage({ ok: false, text: t('backup.err.readFail') });
+      return;
+    }
+    const result = parseBackup(text);
+    if (!result.ok) { setMessage({ ok: false, text: t(`backup.err.${result.error}` as 'backup.err.empty', { detail: result.detail ?? '' }) }); return; }
+    setPending({ fileName: file.name, result });
   }
+
+  function confirmImport() {
+    if (!pending) return;
+    // Save first: only report success (and replace what is on screen) if the browser really stored it.
+    if (!commitImport(pending.result.progress).ok) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
+    replace(pending.result.progress);
+    setPending(null);
+    setMessage({ ok: true, text: t('prog.importOk') });
+  }
+
+  const current = summarizeProgress(progress);
+  const hasCurrent = hasProgress(progress);
+  const rows = [
+    { label: 'backup.attempts', key: 'attempts' }, { label: 'backup.lessons', key: 'completedLessons' }, { label: 'backup.exams', key: 'exams' },
+    { label: 'backup.sims', key: 'simResults' }, { label: 'backup.cards', key: 'reviewCards' },
+  ] as const;
 
   return (
     <div>
@@ -136,9 +165,29 @@ export default function ProgressPage() {
           <div className="flex flex-wrap gap-3">
             <Button tone="secondary" onClick={exportJson}>{t('prog.export')}</Button>
             <Button tone="secondary" onClick={() => fileRef.current?.click()}>{t('prog.import')}</Button>
-            <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { importJson(e.target.files?.[0]); e.target.value = ''; }} />
+            <input ref={fileRef} type="file" accept="application/json,.json" aria-label={t('prog.import')} className="hidden" onChange={(e) => { void chooseFile(e.target.files?.[0]); e.target.value = ''; }} />
           </div>
-          {importMsg && <div className="mt-3"><Alert tone={importMsg.ok ? 'green' : 'red'}>{importMsg.text}</Alert></div>}
+          {message && <div className="mt-3"><Alert tone={message.ok ? 'green' : 'red'}>{message.text}</Alert></div>}
+          {pending && (
+            <div className="mt-4 rounded-lg border border-slate-300 p-4" role="region" aria-label={t('backup.previewTitle')}>
+              <h3 className="font-semibold text-slate-900">{t('backup.previewTitle')}</h3>
+              <p className="text-sm text-slate-600">{t('backup.file')}: {pending.fileName} · {t('backup.exportedAt')}: {pending.result.exportedAt ? date(pending.result.exportedAt) : t('backup.unknownDate')}</p>
+              {pending.result.upgraded && <p className="mt-1 text-sm text-slate-600">{t('backup.upgraded')}</p>}
+              <table className="my-3 w-full max-w-md text-left text-sm">
+                <thead className="text-xs uppercase text-slate-500"><tr><th className="py-1">{t('backup.item')}</th><th>{t('backup.inBackup')}</th><th>{t('backup.inBrowser')}</th></tr></thead>
+                <tbody className="divide-y divide-slate-100">
+                  {rows.map((r) => <tr key={r.key}><td className="py-1">{t(r.label)}</td><td>{pending.result.summary[r.key]}</td><td>{current[r.key]}</td></tr>)}
+                  <tr><td className="py-1">{t('backup.last')}</td><td>{pending.result.summary.lastActivity ? date(pending.result.summary.lastActivity) : '-'}</td><td>{current.lastActivity ? date(current.lastActivity) : '-'}</td></tr>
+                </tbody>
+              </table>
+              {hasCurrent && <Alert tone="amber" title={t('backup.replaceTitle')}>{t('backup.replaceWarning')}</Alert>}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button tone={hasCurrent ? 'danger' : 'primary'} onClick={confirmImport}>{hasCurrent ? t('backup.confirmReplace') : t('backup.confirmRestore')}</Button>
+                {hasCurrent && <Button tone="secondary" onClick={exportJson}>{t('backup.downloadCurrent')}</Button>}
+                <Button tone="secondary" onClick={() => setPending(null)}>{t('common.cancel')}</Button>
+              </div>
+            </div>
+          )}
         </Card>
         <Card className="border-red-200 lg:col-span-2">
           <H2>{t('prog.resetTitle')}</H2>
