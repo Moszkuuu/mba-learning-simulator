@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
-import { getLesson, getLessons, reviseLessonFor, subjectOfLesson } from '../content';
+import { ALL_LESSON_KEYS, getLesson, getLessons, reviseLessonFor, subjectOfLesson } from '../content';
 import { subjectById } from '../curriculum/program';
 import { competencyById } from '../curriculum/program';
 import { Alert, Badge, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
@@ -32,7 +32,9 @@ export default function LessonPage({ id }: { id: string }) {
   const done = progress.completedLessons.includes(lesson.id);
   const prevScore = progress.lessonScores[lesson.id];
   const stats = competencyStats(progress);
-  const unmet = lesson.competencies.flatMap((c) => unmetPrerequisites(c, stats));
+  // A prerequisite only blocks the student if its lessons are not all completed yet; mastery progress is shown as a hint.
+  const lessonsDone = (c: string) => ALL_LESSON_KEYS.filter((l) => l.competencies.includes(c)).every((l) => progress.completedLessons.includes(l.id));
+  const unmet = lesson.competencies.flatMap((c) => unmetPrerequisites(c, stats)).filter((c) => !lessonsDone(c));
 
   function finish(o: QuizOutcome[]) {
     setOutcomes(o);
@@ -98,6 +100,7 @@ export default function LessonPage({ id }: { id: string }) {
                 <span key={c}>
                   {i > 0 && ', '}
                   {target ? <Link to={`/lesson/${target.id}`} className="font-semibold text-indigo-700 underline">{name}</Link> : name}
+                  {` (${stats.find((x) => x.competency === c)?.progressPct ?? 0}%)`}
                 </span>
               );
             })}
