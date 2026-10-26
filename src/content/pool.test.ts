@@ -1,18 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { SUBJECT_CONTENT, getLessons } from './index';
+import { getLessons } from './index';
 import { POOL_TARGET } from '../lib/quiz';
 
-/** Subjects whose lessons are expected to hold a full pool. Add a subject here when its pools are finished. */
-const SUBJECTS_AT_TARGET: string[] = ['financial-accounting', 'managerial-accounting', 'corporate-finance', 'managerial-economics', 'marketing', 'operations', 'strategy', 'organizational-behavior', 'analytics-statistics'];
 
 describe('question pools', () => {
-  it('finished subjects have at least 30 questions per lesson', () => {
-    for (const id of SUBJECTS_AT_TARGET) {
-      for (const l of SUBJECT_CONTENT[id].lessons) {
-        const n = getLessons('en').find((x) => x.id === l.id)!.questions.length;
-        expect(n, l.id).toBeGreaterThanOrEqual(POOL_TARGET);
-      }
-    }
+  it('every lesson has at least 30 questions in its pool', () => {
+    for (const l of getLessons('en')) expect(l.questions.length, l.id).toBeGreaterThanOrEqual(POOL_TARGET);
   });
   it('has no duplicate prompts within a lesson (English)', () => {
     for (const l of getLessons('en')) {
