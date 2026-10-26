@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
-import { getLesson, getLessons, subjectOfLesson } from '../content';
+import { getLesson, getLessons, reviseLessonFor, subjectOfLesson } from '../content';
 import { subjectById } from '../curriculum/program';
 import { competencyById } from '../curriculum/program';
 import { Alert, Badge, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
@@ -90,7 +90,17 @@ export default function LessonPage({ id }: { id: string }) {
       {unmet.length > 0 && (
         <div className="mb-4">
           <Alert tone="amber" title={t('lesson.prereqTitle')}>
-            {t('lesson.prereqBody')} {[...new Set(unmet)].map((c) => competencyById(c)?.name[lang]).join(', ')}
+            {t('lesson.prereqBody')}{' '}
+            {[...new Set(unmet)].map((c, i) => {
+              const target = reviseLessonFor(c);
+              const name = competencyById(c)?.name[lang];
+              return (
+                <span key={c}>
+                  {i > 0 && ', '}
+                  {target ? <Link to={`/lesson/${target.id}`} className="font-semibold text-indigo-700 underline">{name}</Link> : name}
+                </span>
+              );
+            })}
           </Alert>
         </div>
       )}

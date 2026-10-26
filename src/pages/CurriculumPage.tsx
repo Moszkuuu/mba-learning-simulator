@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Badge, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
 import { useProgress } from '../components/ProgressContext';
 import { useI18n } from '../i18n';
 import { COMPETENCIES, REFERENCES, SUBJECTS, THREADS, subjectById, unitsOf } from '../curriculum/program';
-import { lessonsOfSubject } from '../content';
+import { lessonsOfSubject, reviseLessonFor } from '../content';
 import { competencyStats } from '../lib/progress';
 
 const STATUS_TONE = { mastered: 'green', learning: 'indigo', weak: 'red', stale: 'amber', new: 'slate' } as const;
@@ -11,6 +12,16 @@ export default function CurriculumPage() {
   const { progress } = useProgress();
   const { t, lang } = useI18n();
   const stats = competencyStats(progress);
+  const [open, setOpen] = useState<string[]>(['financial-accounting']);
+  const jump = (id: string) => {
+    setOpen((o) => (o.includes(id) ? o : [...o, id]));
+    setTimeout(() => document.getElementById(`subject-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
+  const subjectLinks = (ids: string[]) => ids.map((r, i) => {
+    const sub = subjectById(r);
+    if (!sub) return null;
+    return <span key={r}>{i > 0 && ', '}{sub.status === 'available' ? <button type="button" className="font-medium text-indigo-700 underline" onClick={() => jump(r)}>{sub.name[lang]}</button> : sub.name[lang]}</span>;
+  });
 
   return (
     <div>
@@ -22,11 +33,10 @@ export default function CurriculumPage() {
           const lessons = lessonsOfSubject(s.id, lang);
           const done = lessons.filter((l) => progress.completedLessons.includes(l.id)).length;
           const comps = COMPETENCIES.filter((c) => c.subjectId === s.id);
-          const needs = s.requires.map((r) => subjectById(r)?.name[lang]).filter(Boolean);
-          const recs = s.recommends.map((r) => subjectById(r)?.name[lang]).filter(Boolean);
+          const needs = s.requires, recs = s.recommends;
           return (
             <Card key={s.id} className={available ? '' : 'opacity-80'}>
-              <details open={s.id === 'financial-accounting'}>
+              <details id={`subject-${s.id}`} open={open.includes(s.id)} onToggle={(e) => { const isOpen = (e.currentTarget as HTMLDetailsElement).open; setOpen((o) => (isOpen ? (o.includes(s.id) ? o : [...o, s.id]) : o.filter((x) => x !== s.id))); }}>
                 <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2">
                   <span>
                     <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">{t('cur.subject', { n: s.number })}</span>
@@ -36,8 +46,8 @@ export default function CurriculumPage() {
                 </summary>
                 {(needs.length > 0 || recs.length > 0) && (
                   <p className="mt-2 text-sm text-slate-600">
-                    {needs.length > 0 && <>{t('cur.requires')}: {needs.join(', ')}. </>}
-                    {recs.length > 0 && <>{t('cur.recommends')}: {recs.join(', ')}.</>}
+                    {needs.length > 0 && <>{t('cur.requires')}: {subjectLinks(needs)}. </>}
+                    {recs.length > 0 && <>{t('cur.recommends')}: {subjectLinks(recs)}.</>}
                   </p>
                 )}
                 {available && (
@@ -81,7 +91,9 @@ export default function CurriculumPage() {
                           const st = stats.find((x) => x.competency === c.id)!;
                           return (
                             <li key={c.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-                              <span>{c.name[lang]}</span>
+                              {c.available && reviseLessonFor(c.id)
+                                ? <Link to={`/lesson/${reviseLessonFor(c.id)!.id}`} className="font-medium text-indigo-700 hover:underline">{c.name[lang]}</Link>
+                                : <span>{c.name[lang]}</span>}
                               {c.available ? <Badge tone={STATUS_TONE[st.status]}>{t(`mastery.${st.status}` as 'mastery.new')}</Badge> : <Badge>{t('cur.planned')}</Badge>}
                             </li>
                           );
