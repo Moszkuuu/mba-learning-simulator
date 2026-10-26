@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useState } from 'react';
 import { ALL_LESSON_KEYS, getLesson, getLessons, reviseLessonFor, subjectOfLesson } from '../content';
 import { subjectById } from '../curriculum/program';
 import { competencyById } from '../curriculum/program';
@@ -8,6 +8,7 @@ import { useProgress } from '../components/ProgressContext';
 import { useI18n } from '../i18n';
 import { competencyStats } from '../lib/progress';
 import { unmetPrerequisites } from '../lib/mastery';
+import { QUIZ_SIZE, drawQuiz } from '../lib/quiz';
 
 export default function LessonPage({ id }: { id: string }) {
   const { t, lang } = useI18n();
@@ -15,7 +16,9 @@ export default function LessonPage({ id }: { id: string }) {
   const { progress, dispatch } = useProgress();
   const [stage, setStage] = useState<'learn' | 'quiz' | 'done'>('learn');
   const [outcomes, setOutcomes] = useState<QuizOutcome[]>([]);
-  const ids = useMemo(() => lesson?.questions.map((q) => q.id) ?? [], [lesson?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [ids, setIds] = useState<string[]>([]);
+  /** Each quiz start draws a fresh random set from the lesson's question pool. */
+  const startQuiz = () => { if (lesson) { setIds(drawQuiz(lesson.questions)); setStage('quiz'); } };
 
   if (!lesson) {
     return (
@@ -69,7 +72,7 @@ export default function LessonPage({ id }: { id: string }) {
           <Alert tone="blue" title={t('lesson.masteryNoteTitle')}>{t('lesson.masteryNote')}</Alert>
           <div className="flex flex-wrap gap-3">
             <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50" onClick={() => { setOutcomes([]); setStage('learn'); }}>{t('lesson.reread')}</button>
-            <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50" onClick={() => setStage('quiz')}>{t('lesson.retake')}</button>
+            <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50" onClick={startQuiz}>{t('lesson.retake')}</button>
             {next ? <LinkButton to={`/lesson/${next.id}`}>{t('lesson.next', { n: next.number })}</LinkButton> : <LinkButton to="/curriculum">{t('lesson.backToCurriculum')}</LinkButton>}
           </div>
         </Card>
@@ -84,7 +87,7 @@ export default function LessonPage({ id }: { id: string }) {
       <div className="mb-4 flex flex-wrap gap-2">
         <Badge>{t('lesson.minutes', { n: lesson.minutes })}</Badge>
         {done && <Badge tone="green">{t('lesson.completedBadge')}{prevScore ? ` - ${prevScore.correct}/${prevScore.total}` : ''}</Badge>}
-        <Badge tone="indigo">{t('lesson.questionCount', { n: lesson.questions.length })}</Badge>
+        <Badge tone="indigo">{t('lesson.questionCount', { pool: lesson.questions.length })}</Badge>
         {lesson.competencies.map((c) => <Badge key={c} tone="green">{competencyById(c)?.name[lang]}</Badge>)}
         {lesson.status !== 'full' && <Badge tone="amber">{t('lesson.prototypeDepth')}</Badge>}
       </div>
@@ -146,7 +149,7 @@ export default function LessonPage({ id }: { id: string }) {
           <ul className="list-inside list-disc space-y-2 text-slate-700">{lesson.misconceptions.map((m) => <li key={m}>{m}</li>)}</ul>
         </Card>
         <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => setStage('quiz')} className="rounded-lg bg-indigo-700 px-5 py-2.5 font-semibold text-white hover:bg-indigo-800">{t('lesson.startQuiz', { n: lesson.questions.length })}</button>
+          <button onClick={startQuiz} className="rounded-lg bg-indigo-700 px-5 py-2.5 font-semibold text-white hover:bg-indigo-800">{t('lesson.startQuiz', { n: Math.min(QUIZ_SIZE, lesson.questions.length), pool: lesson.questions.length })}</button>
         </div>
       </div>
     </div>
