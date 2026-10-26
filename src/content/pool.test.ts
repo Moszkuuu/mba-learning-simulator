@@ -3,7 +3,7 @@ import { SUBJECT_CONTENT, getLessons } from './index';
 import { POOL_TARGET } from '../lib/quiz';
 
 /** Subjects whose lessons are expected to hold a full pool. Add a subject here when its pools are finished. */
-const SUBJECTS_AT_TARGET: string[] = ['financial-accounting', 'managerial-accounting', 'corporate-finance', 'managerial-economics'];
+const SUBJECTS_AT_TARGET: string[] = ['financial-accounting', 'managerial-accounting', 'corporate-finance', 'managerial-economics', 'marketing', 'operations', 'strategy'];
 
 describe('question pools', () => {
   it('finished subjects have at least 30 questions per lesson', () => {
