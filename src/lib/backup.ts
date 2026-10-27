@@ -133,10 +133,10 @@ export function getStorage(): Storage | null {
 
 export type SaveResult = { ok: true } | { ok: false; issue: 'unavailable' | 'writeFailed' };
 
-export function saveProgress(progress: Progress, storage: Storage | null = getStorage()): SaveResult {
+export function saveProgress(progress: Progress, storage: Storage | null = getStorage(), key = STORAGE_KEY): SaveResult {
   if (!storage) return { ok: false, issue: 'unavailable' };
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    storage.setItem(key, JSON.stringify(progress));
     return { ok: true };
   } catch {
     return { ok: false, issue: 'writeFailed' };
@@ -148,11 +148,11 @@ export function saveProgress(progress: Progress, storage: Storage | null = getSt
  * Stored text that cannot be read as progress is copied to CORRUPT_COPY_KEY (best effort) before the
  * app starts writing, so it is never silently destroyed.
  */
-export function loadProgress(storage: Storage | null = getStorage()): { progress: Progress; issue: StorageIssue | null } {
+export function loadProgress(storage: Storage | null = getStorage(), key = STORAGE_KEY): { progress: Progress; issue: StorageIssue | null } {
   if (!storage) return { progress: emptyProgress(), issue: 'unavailable' };
   let raw: string | null;
   try {
-    raw = storage.getItem(STORAGE_KEY);
+    raw = storage.getItem(key);
   } catch {
     return { progress: emptyProgress(), issue: 'unavailable' };
   }
@@ -160,7 +160,8 @@ export function loadProgress(storage: Storage | null = getStorage()): { progress
   const check = parseBackup(raw);
   if (!check.ok && check.error !== 'empty') {
     try {
-      if (storage.getItem(CORRUPT_COPY_KEY) === null) storage.setItem(CORRUPT_COPY_KEY, raw);
+      const copyKey = `${key}:corrupt-copy`;
+      if (storage.getItem(copyKey) === null) storage.setItem(copyKey, raw);
     } catch { /* nothing more can be done; the banner still tells the user */ }
     return { progress: parseProgress(raw), issue: 'corrupt' };
   }
@@ -171,6 +172,6 @@ export function loadProgress(storage: Storage | null = getStorage()): { progress
  * Persists a validated import. The caller must only replace the in-memory progress (and report success)
  * when this returns ok; on failure the previously stored progress is untouched.
  */
-export function commitImport(progress: Progress, storage: Storage | null = getStorage()): SaveResult {
-  return saveProgress(progress, storage);
+export function commitImport(progress: Progress, storage: Storage | null = getStorage(), key = STORAGE_KEY): SaveResult {
+  return saveProgress(progress, storage, key);
 }

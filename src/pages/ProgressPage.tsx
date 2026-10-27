@@ -2,9 +2,11 @@ import { useRef, useState } from 'react';
 import { getLessons, getQuestion } from '../content';
 import { COMPETENCIES, competencyById } from '../curriculum/program';
 import { competencyStats } from '../lib/progress';
+import { storageKeyFor } from '../lib/cloud/owner';
 import { backupFileName, commitImport, hasProgress, parseBackup, serializeBackup, summarizeProgress, type BackupResult } from '../lib/backup';
 import { useProgress } from '../components/ProgressContext';
 import { ActivityList } from '../components/ActivityList';
+import { AccountCard } from '../components/AccountCard';
 import { Alert, Badge, Button, Card, H2, PageTitle, Link } from '../components/ui';
 import { money } from '../lib/numeric';
 import { useI18n } from '../i18n';
@@ -12,7 +14,7 @@ import { useI18n } from '../i18n';
 const TONE = { mastered: 'green', learning: 'indigo', weak: 'red', stale: 'amber', new: 'slate' } as const;
 
 export default function ProgressPage() {
-  const { progress, dispatch, replace } = useProgress();
+  const { progress, dispatch, replace, owner } = useProgress();
   const { t, lang, date } = useI18n();
   const [confirming, setConfirming] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -56,7 +58,7 @@ export default function ProgressPage() {
   function confirmImport() {
     if (!pending) return;
     // Save first: only report success (and replace what is on screen) if the browser really stored it.
-    if (!commitImport(pending.result.progress).ok) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
+    if (!commitImport(pending.result.progress, undefined, storageKeyFor(owner)).ok) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
     replace(pending.result.progress);
     setPending(null);
     setMessage({ ok: true, text: t('prog.importOk') });
@@ -159,6 +161,7 @@ export default function ProgressPage() {
           <H2>{t('prog.history')}</H2>
           <ActivityList items={progress.activity.slice(0, 50)} empty={t('prog.noActivity')} />
         </Card>
+        <AccountCard />
         <Card className="lg:col-span-2">
           <H2>{t('prog.backup')}</H2>
           <p className="mb-3 text-sm text-slate-600">{t('prog.backupBody')}</p>
