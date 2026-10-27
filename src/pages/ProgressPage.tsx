@@ -6,7 +6,6 @@ import { storageKeyFor } from '../lib/cloud/owner';
 import { backupFileName, commitImport, hasProgress, parseBackup, serializeBackup, summarizeProgress, type BackupResult } from '../lib/backup';
 import { useProgress } from '../components/ProgressContext';
 import { ActivityList } from '../components/ActivityList';
-import { AccountCard } from '../components/AccountCard';
 import { Alert, Badge, Button, Card, H2, PageTitle, Link } from '../components/ui';
 import { money } from '../lib/numeric';
 import { useI18n } from '../i18n';
@@ -161,7 +160,6 @@ export default function ProgressPage() {
           <H2>{t('prog.history')}</H2>
           <ActivityList items={progress.activity.slice(0, 50)} empty={t('prog.noActivity')} />
         </Card>
-        <AccountCard />
         <Card className="lg:col-span-2">
           <H2>{t('prog.backup')}</H2>
           <p className="mb-3 text-sm text-slate-600">{t('prog.backupBody')}</p>

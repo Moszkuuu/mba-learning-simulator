@@ -1,6 +1,6 @@
 import { getClient } from './client';
 
-export type AuthResult = { ok: true; needsConfirmation?: boolean } | { ok: false; reason: 'invalid' | 'exists' | 'weak' | 'network' | 'rateLimit' | 'unconfigured' | 'other' };
+export type AuthResult = { ok: true; needsConfirmation?: boolean } | { ok: false; reason: 'invalid' | 'exists' | 'weak' | 'network' | 'rateLimit' | 'unconfigured' | 'badCode' | 'other' };
 
 function reasonOf(e: { message?: string; status?: number; name?: string }): Extract<AuthResult, { ok: false }>['reason'] {
   const m = (e.message ?? '').toLowerCase();
@@ -61,6 +61,24 @@ export async function exchangeRecoveryCode(code: string, c: AuthClient | null = 
   try {
     const { error } = await c.auth.exchangeCodeForSession(code);
     return error ? { ok: false, reason: 'invalid' } : { ok: true };
+  } catch { return { ok: false, reason: 'network' }; }
+}
+
+/** The code from the reset email (Supabase's own email OTP, type 'recovery'). Works in any browser or device. */
+export const recoveryOtpFrom = (raw: string): string | null => {
+  const digits = raw.replace(/\s+/g, '');
+  return /^\d{6,10}$/.test(digits) ? digits : null;
+};
+
+export async function verifyRecoveryCode(email: string, code: string, c: AuthClient | null = getClient()): Promise<AuthResult> {
+  if (!c) return { ok: false, reason: 'unconfigured' };
+  const token = recoveryOtpFrom(code);
+  if (!token) return { ok: false, reason: 'badCode' };
+  try {
+    const { error } = await c.auth.verifyOtp({ email, token, type: 'recovery' });
+    if (!error) return { ok: true };
+    const r = reasonOf(error);
+    return { ok: false, reason: r === 'rateLimit' || r === 'network' ? r : 'badCode' };
   } catch { return { ok: false, reason: 'network' }; }
 }
 

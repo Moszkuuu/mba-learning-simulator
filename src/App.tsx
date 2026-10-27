@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProgressProvider, useProgress } from './components/ProgressContext';
 import { I18nProvider, useI18n } from './i18n';
 import { useRoute } from './lib/router';
@@ -11,24 +11,26 @@ import SimulatorPage from './pages/SimulatorPage';
 import ProgressPage from './pages/ProgressPage';
 import GlossaryPage from './pages/GlossaryPage';
 import { AccountCard } from './components/AccountCard';
+import { ForgotPage, LoginPage, ResetPage, SignupPage } from './pages/AuthPages';
 import { NavAccount } from './components/AccountEntry';
 import { Alert, Card, H2, LinkButton } from './components/ui';
 import type { TKey } from './i18n/en';
 
 const NAV: { to: string; label: TKey }[] = [
   { to: '/', label: 'nav.dashboard' },
-  { to: '/curriculum', label: 'nav.curriculum' },
-  { to: '/review', label: 'nav.review' },
+  { to: '/courses', label: 'nav.curriculum' },
   { to: '/practice', label: 'nav.practice' },
-  { to: '/simulator', label: 'nav.simulator' },
   { to: '/progress', label: 'nav.progress' },
-  { to: '/glossary', label: 'nav.glossary' },
 ];
 
 function Page({ path }: { path: string }) {
   const { t } = useI18n();
   if (path === '/') return <Dashboard />;
-  if (path === '/curriculum') return <CurriculumPage />;
+  if (path === '/courses') return <CurriculumPage />;
+  if (path === '/login') return <LoginPage />;
+  if (path === '/signup') return <SignupPage />;
+  if (path === '/forgot') return <ForgotPage />;
+  if (path === '/reset') return <ResetPage />;
   if (path.startsWith('/lesson/')) return <LessonPage key={path} id={path.slice('/lesson/'.length)} />;
   if (path === '/practice') return <PracticePage />;
   if (path === '/review') return <ReviewPage />;
@@ -60,9 +62,11 @@ function LangSwitch() {
 function Shell() {
   const path = useRoute();
   const { t } = useI18n();
+  // Old bookmarks: the course list used to live at /curriculum.
+  useEffect(() => { if (path === '/curriculum') window.location.replace('#/courses'); }, [path]);
   const { storageIssue } = useProgress();
   const [open, setOpen] = useState(false);
-  const active = (to: string) => (to === '/' ? path === '/' : path.startsWith(to) || (to === '/curriculum' && path.startsWith('/lesson/')));
+  const active = (to: string) => (to === '/' ? path === '/' : path.startsWith(to) || (to === '/courses' && path.startsWith('/lesson/')));
 
   const links = NAV.map((n) => (
     <a key={n.to} href={`#${n.to}`} onClick={() => setOpen(false)} aria-current={active(n.to) ? 'page' : undefined}

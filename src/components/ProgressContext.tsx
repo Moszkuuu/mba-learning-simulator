@@ -23,6 +23,7 @@ interface Ctx {
   /** Password-reset link state: 'ready' = choose a new password, 'failed' = the link did not work. */
   recovery: 'none' | 'ready' | 'failed';
   endRecovery: () => void;
+  beginRecovery: () => void;
 }
 const C = createContext<Ctx | null>(null);
 
@@ -70,7 +71,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const code = recoveryCodeFromSearch(window.location.search);
     if (code) {
       window.history.replaceState(null, '', window.location.pathname);
-      window.location.hash = '#/progress'; // fires hashchange so the router opens the Progress page
+      window.location.hash = '#/reset'; // fires hashchange so the router opens the Reset Password page
       void exchangeRecoveryCode(code).then((r) => { if (!r.ok) setRecovery('failed'); });
     }
     void c.auth.getSession().then(({ data }) => adopt(data.session?.user)).catch(() => setSyncStatus('offline'));
@@ -146,7 +147,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const storageIssue = session.issue ?? saveIssue;
   return (
-    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, recovery, endRecovery: () => setRecovery('none') }}>
+    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, recovery, endRecovery: () => setRecovery('none'), beginRecovery: () => setRecovery('ready') }}>
       {children}
     </C.Provider>
   );

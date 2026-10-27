@@ -3,6 +3,7 @@ import { getAllQuestions, getLessons, subjectOfLesson } from '../content';
 import { SUBJECTS } from '../curriculum/program';
 import type { Level } from '../content/types';
 import { QuizRunner, type QuizOutcome } from '../components/QuizRunner';
+import { ToolLinks } from '../components/AccountEntry';
 import { Alert, Button, Card, PageTitle, Link } from '../components/ui';
 import { shuffle } from '../lib/shuffle';
 import { useI18n } from '../i18n';
@@ -73,6 +74,7 @@ export default function PracticePage() {
   return (
     <div>
       <PageTitle title={t('nav.practice')} subtitle={t('practice.subtitle')} />
+      <ToolLinks />
       <Card className="space-y-6">
         <fieldset>
           <legend className="mb-2 font-semibold text-slate-900">{t('practice.lessons')}</legend>

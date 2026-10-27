@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ToolLinks } from '../components/AccountEntry';
 import { Badge, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
 import { useProgress } from '../components/ProgressContext';
 import { useI18n } from '../i18n';
@@ -26,6 +27,7 @@ export default function CurriculumPage() {
   return (
     <div>
       <PageTitle title={t('cur.title')} subtitle={t('cur.subtitle')} />
+      <ToolLinks />
       <p className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">{t('cur.disclaimer')}</p>
       <div className="mt-4 space-y-3">
         {SUBJECTS.map((s) => {

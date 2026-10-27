@@ -1,54 +1,63 @@
-import { useState } from 'react';
 import { useProgress } from './ProgressContext';
-import { AccountCard } from './AccountCard';
-import { Button, Card, H2, LinkButton } from './ui';
+import { GuestOffer } from './AccountCard';
+import { Card, H2, LinkButton } from './ui';
 import { cloudConfigured } from '../lib/cloud/client';
 import { signOut } from '../lib/cloud/auth';
 import { useI18n } from '../i18n';
 
-const HIDE_KEY = 'mba-lab:hide-welcome';
-const hidden = () => { try { return sessionStorage.getItem(HIDE_KEY) === '1'; } catch { return false; } };
-
-/** Home page entry point: sign-in form for guests (reusing AccountCard), a welcome card once signed in. */
-export function HomeAccount({ continueTo }: { continueTo: string }) {
+/** Top of the Home page: one obvious next step for everyone. */
+export function HomeHero({ continueTo, started }: { continueTo: string; started: boolean }) {
   const { owner } = useProgress();
   const { t } = useI18n();
-  const [dismissed, setDismissed] = useState(hidden);
-  if (!cloudConfigured) return null;
-
   if (owner.kind === 'user') {
     return (
-      <Card className="mb-4">
+      <Card className="mb-6">
         <H2>{t('home.welcome')}</H2>
         <p className="text-sm text-slate-600">{t('home.signedInBody', { email: owner.email })}</p>
-        <div className="mt-3 flex flex-wrap gap-3">
+        <div className="mt-4 flex flex-wrap gap-3">
           <LinkButton to={continueTo}>{t('home.continue')}</LinkButton>
-          <LinkButton to="/progress" tone="secondary">{t('home.viewProgress')}</LinkButton>
+          <LinkButton to="/courses" tone="secondary">{t('nav.curriculum')}</LinkButton>
+          <LinkButton to="/progress" tone="secondary">{t('nav.progress')}</LinkButton>
         </div>
+        <GuestOffer />
       </Card>
     );
   }
-  if (dismissed) return null;
   return (
-    <div className="mb-4 grid gap-4">
-      <AccountCard />
-      <Card>
-        <p className="text-sm text-slate-600">{t('home.guestBody')}</p>
-        <div className="mt-3">
-          <Button tone="secondary" onClick={() => { try { sessionStorage.setItem(HIDE_KEY, '1'); } catch { /* ignore */ } setDismissed(true); }}>{t('home.guest')}</Button>
-        </div>
-      </Card>
+    <Card className="mb-6">
+      <H2>{started ? t('home.welcome') : t('home.hello')}</H2>
+      <p className="text-sm text-slate-600">{t('home.guestBody')}</p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        {started
+          ? <LinkButton to={continueTo}>{t('home.continue')}</LinkButton>
+          : <LinkButton to="/courses">{t('home.guest')}</LinkButton>}
+        {cloudConfigured && <LinkButton to="/login" tone="secondary">{t('auth.loginTitle')}</LinkButton>}
+        {cloudConfigured && <LinkButton to="/signup" tone="secondary">{t('acct.signUp')}</LinkButton>}
+      </div>
+    </Card>
+  );
+}
+
+/** Review, Simulator and Glossary: kept out of the main menu, but one click from Home, Courses and Practice. */
+export function ToolLinks() {
+  const { t } = useI18n();
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+      <span className="text-slate-500">{t('home.moreTools')}</span>
+      <a className="font-medium text-indigo-700 underline" href="#/review">{t('nav.review')}</a>
+      <a className="font-medium text-indigo-700 underline" href="#/simulator">{t('nav.simulator')}</a>
+      <a className="font-medium text-indigo-700 underline" href="#/glossary">{t('nav.glossary')}</a>
     </div>
   );
 }
 
-/** Account access in the main navigation (desktop sidebar and mobile header). */
+/** Account access in the main navigation (desktop sidebar and mobile menu). */
 export function NavAccount({ onNavigate }: { onNavigate?: () => void }) {
   const { owner } = useProgress();
   const { t } = useI18n();
   if (!cloudConfigured) return null;
   if (owner.kind === 'guest') {
-    return <a href="#/account" onClick={onNavigate} className="block rounded-lg bg-indigo-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-indigo-800">{t('nav.login')}</a>;
+    return <a href="#/login" onClick={onNavigate} className="block rounded-lg bg-indigo-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-indigo-800">{t('nav.login')}</a>;
   }
   return (
     <details className="relative text-sm">

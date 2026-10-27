@@ -24,7 +24,7 @@ export default function LessonPage({ id }: { id: string }) {
     return (
       <Card>
         <H2>{t('lesson.notFound')}</H2>
-        <LinkButton to="/curriculum">{t('lesson.backToCurriculum')}</LinkButton>
+        <LinkButton to="/courses">{t('lesson.backToCurriculum')}</LinkButton>
       </Card>
     );
   }
@@ -73,7 +73,7 @@ export default function LessonPage({ id }: { id: string }) {
           <div className="flex flex-wrap gap-3">
             <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50" onClick={() => { setOutcomes([]); setStage('learn'); }}>{t('lesson.reread')}</button>
             <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50" onClick={startQuiz}>{t('lesson.retake')}</button>
-            {next ? <LinkButton to={`/lesson/${next.id}`}>{t('lesson.next', { n: next.number })}</LinkButton> : <LinkButton to="/curriculum">{t('lesson.backToCurriculum')}</LinkButton>}
+            {next ? <LinkButton to={`/lesson/${next.id}`}>{t('lesson.next', { n: next.number })}</LinkButton> : <LinkButton to="/courses">{t('lesson.backToCurriculum')}</LinkButton>}
           </div>
         </Card>
       </div>
@@ -82,7 +82,7 @@ export default function LessonPage({ id }: { id: string }) {
 
   return (
     <div>
-      <p className="mb-2 text-sm"><Link to="/curriculum" className="text-indigo-700 underline">{subjectById(subjectOfLesson(lesson.id) ?? '')?.name[lang]}</Link> / {t('lesson.label', { n: lesson.number })}</p>
+      <p className="mb-2 text-sm"><Link to="/courses" className="text-indigo-700 underline">{subjectById(subjectOfLesson(lesson.id) ?? '')?.name[lang]}</Link> / {t('lesson.label', { n: lesson.number })}</p>
       <PageTitle title={`${t('lesson.label', { n: lesson.number })}: ${lesson.title}`} subtitle={lesson.summary} />
       <div className="mb-4 flex flex-wrap gap-2">
         <Badge>{t('lesson.minutes', { n: lesson.minutes })}</Badge>
