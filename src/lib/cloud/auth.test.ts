@@ -1,23 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { exchangeRecoveryCode, recoveryCodeFromSearch, recoveryOtpFrom, requestPasswordReset, setNewPassword, verifyRecoveryCode } from './auth';
+import { parseRecoveryHash, requestPasswordReset, setNewPassword, startRecoverySession, takePendingRecovery } from './auth';
 
 type Fake = Parameters<typeof requestPasswordReset>[1];
 const fake = (auth: Record<string, unknown>) => ({ auth }) as unknown as Fake;
+const tokens = { kind: 'tokens' as const, accessToken: 'AAA.bbb.ccc', refreshToken: 'refresh123' };
 
-describe('password reset helpers', () => {
-  it('reads the recovery code from the query string only, ignoring other values', () => {
-    expect(recoveryCodeFromSearch('?code=abcd1234-efgh')).toBe('abcd1234-efgh');
-    expect(recoveryCodeFromSearch('')).toBeNull();
-    expect(recoveryCodeFromSearch('?code=')).toBeNull();
-    expect(recoveryCodeFromSearch('?code=<script>alert(1)</script>')).toBeNull();
-    expect(recoveryCodeFromSearch('?other=abcd1234efgh')).toBeNull();
+describe('password reset (implicit flow, default email template)', () => {
+  it('reads the session tokens the emailed link puts in the URL fragment', () => {
+    expect(parseRecoveryHash('#access_token=AAA.bbb.ccc&expires_in=3600&refresh_token=refresh123&token_type=bearer&type=recovery')).toEqual(tokens);
+  });
+
+  it('never mistakes app routes or unrelated fragments for a recovery link', () => {
+    expect(parseRecoveryHash('')).toBeNull();
+    expect(parseRecoveryHash('#/progress')).toBeNull();
+    expect(parseRecoveryHash('#/reset')).toBeNull();
+    expect(parseRecoveryHash('#section-2')).toBeNull();
+    // a non-recovery token (e.g. a signup link) is not accepted on the reset path
+    expect(parseRecoveryHash('#access_token=a&refresh_token=b&type=signup')).toBeNull();
+    // tokens without a refresh token are incomplete
+    expect(parseRecoveryHash('#access_token=a&type=recovery')).toBeNull();
+  });
+
+  it('maps expired, already-used and invalid links to clear reasons', () => {
+    expect(parseRecoveryHash('#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired')).toEqual({ kind: 'error', reason: 'expired' });
+    expect(parseRecoveryHash('#error=access_denied&error_code=something_else')).toEqual({ kind: 'error', reason: 'invalid' });
+  });
+
+  it('hands the link result over once only (so tokens cannot be processed twice)', () => {
+    expect(takePendingRecovery()).toBeNull(); // nothing pending in a plain page load
   });
 
   it('requests the reset email with the app address as redirect (no token, no password in the URL)', async () => {
     const calls: unknown[][] = [];
     const c = fake({ resetPasswordForEmail: async (...a: unknown[]) => { calls.push(a); return { error: null }; } });
-    const r = await requestPasswordReset('a@example.com', c, 'https://site.example/mba-learning-simulator/');
-    expect(r).toEqual({ ok: true });
+    expect(await requestPasswordReset('a@example.com', c, 'https://site.example/mba-learning-simulator/')).toEqual({ ok: true });
     expect(calls[0]).toEqual(['a@example.com', { redirectTo: 'https://site.example/mba-learning-simulator/' }]);
   });
 
@@ -28,32 +44,13 @@ describe('password reset helpers', () => {
     expect(await requestPasswordReset('a@example.com', down, 'x')).toEqual({ ok: false, reason: 'network' });
   });
 
-  it('exchanges the code once and reports a bad or used code as a failure', async () => {
-    const used: string[] = [];
-    const good = fake({ exchangeCodeForSession: async (code: string) => { used.push(code); return { error: null }; } });
-    expect(await exchangeRecoveryCode('abcd1234', good)).toEqual({ ok: true });
-    expect(used).toEqual(['abcd1234']);
-    const bad = fake({ exchangeCodeForSession: async () => ({ error: { message: 'invalid flow state' } }) });
-    expect(await exchangeRecoveryCode('abcd1234', bad)).toEqual({ ok: false, reason: 'invalid' });
-  });
-
-  it('verifies the emailed code with Supabase\'s own recovery OTP, and works without any stored verifier', async () => {
-    const calls: unknown[] = [];
-    const ok = fake({ verifyOtp: async (p: unknown) => { calls.push(p); return { error: null }; } });
-    expect(await verifyRecoveryCode('a@example.com', ' 123 456 ', ok)).toEqual({ ok: true });
-    expect(calls).toEqual([{ email: 'a@example.com', token: '123456', type: 'recovery' }]);
-  });
-
-  it('rejects malformed codes locally and maps wrong or expired codes to a clear reason', async () => {
-    let called = 0;
-    const c = fake({ verifyOtp: async () => { called++; return { error: { message: 'Token has expired or is invalid', status: 403 } }; } });
-    expect(await verifyRecoveryCode('a@example.com', 'abc', c)).toEqual({ ok: false, reason: 'badCode' });
-    expect(called).toBe(0);
-    expect(await verifyRecoveryCode('a@example.com', '123456', c)).toEqual({ ok: false, reason: 'badCode' });
-    const down = fake({ verifyOtp: async () => { throw new Error('offline'); } });
-    expect(await verifyRecoveryCode('a@example.com', '123456', down)).toEqual({ ok: false, reason: 'network' });
-    expect(recoveryOtpFrom('12345')).toBeNull();
-    expect(recoveryOtpFrom('12345678')).toBe('12345678');
+  it('turns the link tokens into a session, and reports a rejected token as invalid', async () => {
+    const seen: unknown[] = [];
+    const ok = fake({ setSession: async (p: unknown) => { seen.push(p); return { error: null }; } });
+    expect(await startRecoverySession(tokens, ok)).toEqual({ ok: true });
+    expect(seen).toEqual([{ access_token: 'AAA.bbb.ccc', refresh_token: 'refresh123' }]);
+    const bad = fake({ setSession: async () => ({ error: { message: 'invalid JWT' } }) });
+    expect(await startRecoverySession(tokens, bad)).toEqual({ ok: false, reason: 'invalid' });
   });
 
   it('rejects a weak new password before calling the server, and reports success otherwise', async () => {
@@ -63,5 +60,10 @@ describe('password reset helpers', () => {
     expect(called).toBe(0);
     expect(await setNewPassword('long-enough-1', c)).toEqual({ ok: true });
     expect(called).toBe(1);
+  });
+
+  it('explains a reused password instead of calling it weak', async () => {
+    const c = fake({ updateUser: async () => ({ error: { message: 'New password should be different from the old password.', status: 422 } }) });
+    expect(await setNewPassword('long-enough-1', c)).toEqual({ ok: false, reason: 'samePassword' });
   });
 });

@@ -20,6 +20,20 @@ export function getClient(): SupabaseClient | null {
   return client;
 }
 
+/**
+ * Used only to request a password-reset email. Implicit flow makes the emailed link carry its token in the URL
+ * fragment, so it opens in any browser or device (a PKCE link only works in the browser that asked for it).
+ * It stores nothing; the main client above does everything else.
+ */
+let recoveryClient: SupabaseClient | null = null;
+export function getRecoveryClient(): SupabaseClient | null {
+  if (!cloudConfigured) return null;
+  recoveryClient ??= createClient(url!, anonKey!, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, flowType: 'implicit', storageKey: 'mba-lab-recovery' },
+  });
+  return recoveryClient;
+}
+
 /** A store bound to one account. RLS in the database enforces the same rule a second time. */
 export function storeFor(c: SupabaseClient, userId: string): CloudStore {
   return {

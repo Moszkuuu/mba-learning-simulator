@@ -5,7 +5,7 @@ import { GUEST, LAST_USER_KEY, openOwner, sessionReducer, storageKeyFor, type Ow
 import { cloudConfigured, getClient, storeFor } from '../lib/cloud/client';
 import { syncProgress } from '../lib/cloud/sync';
 import { createSyncRunner } from '../lib/cloud/runner';
-import { exchangeRecoveryCode, recoveryCodeFromSearch } from '../lib/cloud/auth';
+import { startRecoverySession, takePendingRecovery } from '../lib/cloud/auth';
 
 export type SyncStatus = 'off' | 'idle' | 'syncing' | 'synced' | 'offline' | 'needsLogin' | 'blocked' | 'error';
 
@@ -21,9 +21,8 @@ interface Ctx {
   guestOffer: ProgressSummary | null;
   copyGuest: () => void;
   /** Password-reset link state: 'ready' = choose a new password, 'failed' = the link did not work. */
-  recovery: 'none' | 'ready' | 'failed';
+  recovery: 'none' | 'ready' | 'expired' | 'invalid';
   endRecovery: () => void;
-  beginRecovery: () => void;
 }
 const C = createContext<Ctx | null>(null);
 
@@ -45,7 +44,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [saveIssue, setSaveIssue] = useState<StorageIssue | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(cloudConfigured ? 'idle' : 'off');
   const [guestOffer, setGuestOffer] = useState<ProgressSummary | null>(null);
-  const [recovery, setRecovery] = useState<'none' | 'ready' | 'failed'>('none');
+  const [recovery, setRecovery] = useState<'none' | 'ready' | 'expired' | 'invalid'>('none');
   const { owner, progress } = session;
 
   const latest = useRef(session);
@@ -67,12 +66,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       safe(() => getStorage()?.setItem(LAST_USER_KEY, JSON.stringify({ id: o.id, email: o.email })), undefined);
       dispatchSession({ type: 'switchOwner', owner: o });
     };
-    // Returning from a password-reset email: ?code=... (the code is single-use, so the URL is cleaned straight away).
-    const code = recoveryCodeFromSearch(window.location.search);
-    if (code) {
-      window.history.replaceState(null, '', window.location.pathname);
+    // Returning from a password-reset email: the tokens were already removed from the address bar when auth.ts loaded.
+    const link = takePendingRecovery();
+    if (link) {
       window.location.hash = '#/reset'; // fires hashchange so the router opens the Reset Password page
-      void exchangeRecoveryCode(code).then((r) => { if (!r.ok) setRecovery('failed'); });
+      if (link.kind === 'error') setRecovery(link.reason);
+      else void startRecoverySession(link).then((r) => setRecovery(r.ok ? 'ready' : 'invalid'));
     }
     void c.auth.getSession().then(({ data }) => adopt(data.session?.user)).catch(() => setSyncStatus('offline'));
     const { data: sub } = c.auth.onAuthStateChange((event, s) => {
@@ -147,7 +146,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const storageIssue = session.issue ?? saveIssue;
   return (
-    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, recovery, endRecovery: () => setRecovery('none'), beginRecovery: () => setRecovery('ready') }}>
+    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, recovery, endRecovery: () => setRecovery('none') }}>
       {children}
     </C.Provider>
   );

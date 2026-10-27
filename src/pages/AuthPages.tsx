@@ -2,13 +2,10 @@ import { useEffect, useState } from 'react';
 import { useProgress } from '../components/ProgressContext';
 import { Alert, Button, Card, H2, LinkButton } from '../components/ui';
 import { cloudConfigured } from '../lib/cloud/client';
-import { requestPasswordReset, setNewPassword, signIn, signOut, signUp, verifyRecoveryCode, type AuthResult } from '../lib/cloud/auth';
+import { requestPasswordReset, setNewPassword, signIn, signOut, signUp, type AuthResult } from '../lib/cloud/auth';
 import { useI18n } from '../i18n';
 
 const INPUT = 'mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2';
-const EMAIL_KEY = 'mba-lab:reset-email';
-const rememberEmail = (v: string) => { try { sessionStorage.setItem(EMAIL_KEY, v); } catch { /* optional */ } };
-const recalledEmail = () => { try { return sessionStorage.getItem(EMAIL_KEY) ?? ''; } catch { return ''; } };
 const go = (path: string) => { window.location.hash = `#${path}`; };
 
 /** Shared frame: explains setup if the cloud is off, and sends already-signed-in people home. */
@@ -101,46 +98,38 @@ export function SignupPage() {
 export function ForgotPage() {
   const { t } = useI18n();
   const f = useForm();
-  const [email, setEmail] = useState(recalledEmail);
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
   async function submit() {
     f.setBusy(true); f.setMsg(null);
     const r = await requestPasswordReset(email.trim());
     f.setBusy(false);
-    if (!r.ok) { f.fail(r); return; }
-    rememberEmail(email.trim());
-    go('/reset'); // same next step whether or not the email has an account
+    if (r.ok) setSent(true); else f.fail(r); // same message whether or not the email has an account
   }
   return (
-    <Frame title={t('auth.forgotTitle')} sub={t('auth.forgotSub')}>
-      <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-        <Field label={t('acct.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Button type="submit" disabled={f.busy}>{t('acct.sendReset')}</Button>
-      </form>
+    <Frame title={t('auth.forgotTitle')} sub={sent ? undefined : t('auth.forgotSub')}>
+      {sent ? (
+        <Alert tone="green">{t('auth.linkSent')}</Alert>
+      ) : (
+        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+          <Field label={t('acct.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Button type="submit" disabled={f.busy}>{t('acct.sendReset')}</Button>
+        </form>
+      )}
       {f.note}
-      <div className="mt-4 grid gap-2 text-sm">
-        <a className="text-indigo-700 underline" href="#/reset">{t('auth.haveCode')}</a>
-        <a className="text-indigo-700 underline" href="#/login">{t('acct.backToSignIn')}</a>
-      </div>
+      <div className="mt-4 text-sm"><a className="text-indigo-700 underline" href="#/login">{t('acct.backToSignIn')}</a></div>
     </Frame>
   );
 }
 
 export function ResetPage() {
-  const { recovery, endRecovery, beginRecovery } = useProgress();
+  const { recovery, endRecovery } = useProgress();
   const { t } = useI18n();
   const f = useForm();
-  const [email, setEmail] = useState(recalledEmail);
-  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [done, setDone] = useState(false);
 
-  async function checkCode() {
-    f.setBusy(true); f.setMsg(null);
-    const r = await verifyRecoveryCode(email.trim(), code);
-    f.setBusy(false);
-    if (r.ok) beginRecovery(); else f.fail(r);
-  }
   async function savePassword() {
     if (password !== password2) { f.setMsg({ ok: false, text: t('acct.passwordMismatch') }); return; }
     f.setBusy(true); f.setMsg(null);
@@ -172,18 +161,13 @@ export function ResetPage() {
       </Frame>
     );
   }
+  const problem = recovery === 'expired' ? t('auth.linkExpired') : recovery === 'invalid' ? t('auth.linkInvalid') : null;
   return (
-    <Frame title={t('auth.resetTitle')} sub={t('auth.codeSub')} redirectIfSignedIn={false}>
-      {recovery === 'failed' && <div className="mb-3"><Alert tone="amber">{t('auth.linkFailed')}</Alert></div>}
-      <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); void checkCode(); }}>
-        <Field label={t('acct.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Field label={t('auth.code')} inputMode="numeric" autoComplete="one-time-code" required value={code} onChange={(e) => setCode(e.target.value)} />
-        <Button type="submit" disabled={f.busy}>{t('auth.next')}</Button>
-      </form>
-      {f.note}
-      <div className="mt-4 grid gap-2 text-sm">
-        <a className="text-indigo-700 underline" href="#/forgot">{t('auth.newCode')}</a>
-        <a className="text-indigo-700 underline" href="#/login">{t('acct.backToSignIn')}</a>
+    <Frame title={t('auth.resetTitle')} redirectIfSignedIn={false}>
+      {problem ? <Alert tone="red">{problem}</Alert> : <p className="text-sm text-slate-600">{t('auth.openLink')}</p>}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <LinkButton to="/forgot">{t('auth.newLink')}</LinkButton>
+        <LinkButton to="/login" tone="secondary">{t('acct.backToSignIn')}</LinkButton>
       </div>
     </Frame>
   );
