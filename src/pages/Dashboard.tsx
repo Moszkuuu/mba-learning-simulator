@@ -2,6 +2,7 @@
 import { getLessons, reviseLessonFor, subjectOfLesson } from '../content';
 import { COMPETENCIES, SUBJECTS, competencyById } from '../curriculum/program';
 import { useProgress } from '../components/ProgressContext';
+import { HomeAccount } from '../components/AccountEntry';
 import { ActivityList } from '../components/ActivityList';
 import { Badge, Card, H2, LinkButton, PageTitle, ProgressBar, Stat, Link } from '../components/ui';
 import { levelInfo, quizAccuracy, competencyStats, xp } from '../lib/progress';
@@ -33,6 +34,7 @@ export default function Dashboard() {
   return (
     <div>
       <PageTitle title={t('dash.title')} subtitle={t('dash.subtitle')} />
+      <HomeAccount continueTo={nextLesson ? `/lesson/${nextLesson.id}` : '/curriculum'} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat label={t('dash.level')} value={`L${lvl.level} ${t(`rank.${lvl.level}` as 'rank.1')}`} hint={lvl.nextName ? t('dash.xpToNext', { n: lvl.toNext, name: t(`rank.${lvl.level + 1}` as 'rank.2') }) : t('dash.topLevel')} tone="text-indigo-700" />
         <Stat label={t('dash.completed')} value={`${completed} / ${lessons.length}`} hint={t('dash.completedHint')} />

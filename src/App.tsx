@@ -10,6 +10,8 @@ import ReviewPage from './pages/ReviewPage';
 import SimulatorPage from './pages/SimulatorPage';
 import ProgressPage from './pages/ProgressPage';
 import GlossaryPage from './pages/GlossaryPage';
+import { AccountCard } from './components/AccountCard';
+import { NavAccount } from './components/AccountEntry';
 import { Alert, Card, H2, LinkButton } from './components/ui';
 import type { TKey } from './i18n/en';
 
@@ -32,6 +34,7 @@ function Page({ path }: { path: string }) {
   if (path === '/review') return <ReviewPage />;
   if (path === '/simulator') return <SimulatorPage />;
   if (path === '/progress') return <ProgressPage />;
+  if (path === '/account') return <AccountCard />;
   if (path === '/glossary') return <GlossaryPage />;
   return (
     <Card>
@@ -73,6 +76,7 @@ function Shell() {
       <aside className="hidden w-60 shrink-0 border-r border-slate-200 bg-white p-4 lg:block">
         <a href="#/" className="mb-4 block text-lg font-bold text-indigo-800">{t('app.name')}</a>
         <div className="mb-4"><LangSwitch /></div>
+        <div className="mb-4"><NavAccount /></div>
         <nav className="space-y-1" aria-label="Main">{links}</nav>
         <p className="mt-6 text-xs text-slate-500">{t('app.disclaimer')}</p>
       </aside>
@@ -84,7 +88,7 @@ function Shell() {
             <button onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium">{open ? t('app.close') : t('app.menu')}</button>
           </div>
         </header>
-        {open && <nav id="mobile-nav" aria-label="Main" className="space-y-1 border-b border-slate-200 bg-white p-3 lg:hidden">{links}</nav>}
+        {open && <nav id="mobile-nav" aria-label="Main" className="space-y-1 border-b border-slate-200 bg-white p-3 lg:hidden"><div className="pb-2"><NavAccount onNavigate={() => setOpen(false)} /></div>{links}</nav>}
         <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
           {storageIssue && <div className="mb-4"><Alert tone="red" title={t('storage.title')}>{t(`storage.${storageIssue}` as 'storage.unavailable')} <a href="#/progress" className="font-semibold underline">{t('storage.goBackup')}</a></Alert></div>}
           <Page path={path} />
