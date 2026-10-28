@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getLesson } from '../content';
 import { useProgress } from '../components/ProgressContext';
 import { Alert, Badge, Button, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
 import { useI18n } from '../i18n';
 import { storageKeyFor } from '../lib/cloud/owner';
-import { completeness, labKey, loadLab, quotedFigures, saveLab, selfPoints, verifiedPoints, verifiedResults, type CheckResult, type LabDraft, type LabState } from '../lib/lab';
+import { LAB_CHANGED, LAB_SYNCED, completeness, effectiveSelfPoints, labKey, loadLab, quotedFigures, saveLab, verifiedPoints, verifiedResults, type CheckResult, type EarlierDraft, type LabDraft, type LabState } from '../lib/lab';
+import { GuestOffer } from '../components/AccountCard';
 import { CHECKS, FIELDS, LAB_LEVELS, RATING_MAX, RUBRIC, VERIFIED_POINTS, Y1, Y2, ccc, cashFromDso, dio, dpo, dso, equity, gross, netProfit, ocfY2, operatingProfit, profitBeforeTax, tax, totalAssets, tradeWorkingCapital, type LabLevel, type YearData } from '../lab/case';
 import { fill, labText, type LabText } from '../lab/text';
 
@@ -31,7 +32,14 @@ export default function LabPage({ level }: { level?: LabLevel }) {
     const next = fn(lab);
     setSt({ key, lab: next });
     setSaveOk(saveLab(storage(), key, next));
+    window.dispatchEvent(new Event(LAB_CHANGED)); // signed-in students: the app saves it to the account shortly
   };
+  // Newer work merged in from the account (another device, or copied guest work) appears without a reload.
+  useEffect(() => {
+    const reload = () => setSt({ key, lab: loadLab(storage(), key) });
+    window.addEventListener(LAB_SYNCED, reload);
+    return () => window.removeEventListener(LAB_SYNCED, reload);
+  }, [key]);
 
   if (!level) return <Hub lt={lt} lab={lab} />;
   return <Case lt={lt} level={level} lab={lab} update={update} saveOk={saveOk} />;
@@ -41,7 +49,8 @@ function Hub({ lt, lab }: { lt: LabText; lab: LabState }) {
   return (
     <div>
       <PageTitle title={lt.title} subtitle={lt.tagline} />
-      <div className="space-y-4">
+      <GuestOffer labOnly />
+      <div className="mt-4 space-y-4">
         <Card>
           <p className="text-slate-700">{lt.hubIntro}</p>
           <p className="mt-2 text-sm text-slate-500">{lt.fictional}</p>
@@ -49,6 +58,7 @@ function Hub({ lt, lab }: { lt: LabText; lab: LabState }) {
         <Alert tone="blue" title={lt.hubAssessTitle}>
           <ul className="mt-1 list-inside list-disc space-y-1">{lt.hubAssess.map((x) => <li key={x}>{x}</li>)}</ul>
         </Alert>
+        <p className="text-sm text-slate-600">{lt.choose}</p>
         <div className="grid gap-4 md:grid-cols-3">
           {LAB_LEVELS.map((l) => {
             const subs = lab.submissions.filter((s) => s.level === l);
@@ -97,11 +107,12 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const draft = lab.drafts[level] ?? emptyDraft();
-  const setDraft = (fn: (d: LabDraft) => LabDraft) => update((l) => ({ ...l, drafts: { ...l.drafts, [level]: fn(l.drafts[level] ?? emptyDraft()) } }));
+  const setDraft = (fn: (d: LabDraft) => LabDraft) => update((l) => ({ ...l, drafts: { ...l.drafts, [level]: { ...fn(l.drafts[level] ?? emptyDraft()), updatedAt: new Date().toISOString() } } }));
   const setAnswer = (id: string, v: string) => setDraft((d) => ({ ...d, answers: { ...d.answers, [id]: v } }));
   const results = verifiedResults(level, draft.answers);
   const verified = verifiedPoints(results);
-  const self = selfPoints(draft.ratings);
+  const complete = completeness(level, draft.answers).every((c) => c.ok);
+  const self = effectiveSelfPoints(level, draft.answers, draft.ratings);
   const attempts = lab.submissions.filter((s) => s.level === level);
 
   function submit() {
@@ -112,11 +123,12 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
   }
   function rate(id: string, v: number) {
     const ratings = { ...draft.ratings, [id]: v };
-    const s = selfPoints(ratings);
+    const s = effectiveSelfPoints(level, draft.answers, ratings);
+    const now = new Date().toISOString();
     update((l) => ({
       ...l,
-      drafts: { ...l.drafts, [level]: { ...(l.drafts[level] ?? emptyDraft()), ratings } },
-      submissions: l.submissions.map((x) => (x.at === submittedAt ? { ...x, self: s, total: Math.round((x.verified + s) * 10) / 10 } : x)),
+      drafts: { ...l.drafts, [level]: { ...(l.drafts[level] ?? emptyDraft()), ratings, updatedAt: now } },
+      submissions: l.submissions.map((x) => (x.at === submittedAt ? { ...x, self: s, total: Math.round((x.verified + s) * 10) / 10, updatedAt: now } : x)),
     }));
   }
 
@@ -136,6 +148,17 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
   const stageName = (s: (typeof STAGES)[number]) => lt.stages[s];
 
   const taskFor = (r: CheckResult) => (r.id === 'consistency' ? null : lt.tasks[r.id]);
+  /** Visible progress on the stage buttons: numbers entered, and written fields completed. */
+  const entered = results.filter((r) => r.given !== null).length;
+  const fieldsDone = completeness(level, draft.answers).filter((c) => c.ok).length;
+  const progressOf = (s: (typeof STAGES)[number]): string => (s === 'analysis' ? `${entered}/${results.length}` : s === 'recommend' ? `${fieldsDone}/${FIELDS[level].length}` : '');
+  const earlier = (lab.earlier ?? []).filter((e) => e.level === level);
+  const restoreEarlier = (e: EarlierDraft) => update((l) => {
+    const now = new Date().toISOString();
+    const cur = l.drafts[level];
+    const keep = (l.earlier ?? []).filter((x) => x !== e);
+    return { ...l, drafts: { ...l.drafts, [level]: { ...e.draft, updatedAt: now } }, earlier: cur ? [{ level, savedAt: cur.updatedAt ?? now, draft: cur }, ...keep] : keep };
+  });
 
   return (
     <div>
@@ -144,7 +167,7 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
       <nav aria-label={lt.workflow} className="mb-4 flex flex-wrap gap-2">
         {STAGES.map((s, i) => (
           <button key={s} onClick={() => setStage(i)} aria-current={stage === i ? 'step' : undefined}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${stage === i ? 'bg-indigo-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}>{i + 1}. {stageName(s)}</button>
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${stage === i ? 'bg-indigo-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}>{i + 1}. {stageName(s)}{progressOf(s) ? ` (${progressOf(s)})` : ''}</button>
         ))}
       </nav>
       {!saveOk && <div className="mb-3"><Alert tone="red">{lt.saveFailed}</Alert></div>}
@@ -184,7 +207,8 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
         {stage === 2 && (
           <Card>
             <H2>{lt.analysisTitle}</H2>
-            <p className="mb-3 text-sm text-slate-600">{lt.analysisIntro[level]}</p>
+            <p className="mb-1 text-sm text-slate-600">{lt.analysisIntro[level]}</p>
+            <p className="mb-3 text-xs text-slate-500">{lt.numberHint} {fill(lt.answered, { n: entered, total: results.length })}</p>
             <div className="space-y-4">
               {CHECKS[level].map((c) => {
                 const task = lt.tasks[c.id]!;
@@ -234,6 +258,21 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
                 );
               })}
             </div>
+            {earlier.length > 0 && (
+              <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3">
+                <p className="text-sm font-semibold text-amber-900">{lt.earlierTitle}</p>
+                <p className="text-xs text-amber-900">{lt.earlierNote}</p>
+                <ul className="mt-2 space-y-2">
+                  {earlier.map((e) => (
+                    <li key={`${e.savedAt}-${Object.values(e.draft.answers).join('').length}`} className="text-sm text-slate-700">
+                      <p className="font-medium">{fill(lt.earlierLine, { date: e.savedAt ? new Date(e.savedAt).toLocaleString(lang === 'th' ? 'th-TH' : 'en-GB') : '-' })}</p>
+                      <p className="line-clamp-3 whitespace-pre-line text-xs text-slate-600">{Object.entries(e.draft.answers).filter(([k, v]) => k.startsWith('text.') && v).map(([, v]) => v).join(' / ').slice(0, 300)}</p>
+                      <div className="mt-1"><Button tone="secondary" onClick={() => restoreEarlier(e)}>{lt.earlierRestore}</Button></div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Card>
         )}
 
@@ -284,6 +323,7 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
                 <Card>
                   <H2>{lt.selfTitle}</H2>
                   <p className="mb-3 text-sm text-slate-600">{lt.selfNote}</p>
+                  {!complete && <div className="mb-3"><Alert tone="amber">{lt.capNote}</Alert></div>}
                   <ul className="space-y-4">
                     {RUBRIC.map((r) => (
                       <li key={r.id} className="text-sm">

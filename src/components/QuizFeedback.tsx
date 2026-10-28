@@ -53,6 +53,7 @@ export function QuizFeedback({ lessonId, outcomes }: { lessonId: string; outcome
       {lesson.teaching && (
         <p className="text-sm text-slate-700"><span className="font-semibold">{t('fb.apply')}</span> {lesson.teaching.apply}</p>
       )}
+      <p className="text-sm"><Link to="/lab/beginner" className="font-semibold text-indigo-700 underline">{t('fb.lab')}</Link></p>
       <p className="text-xs text-slate-500">{t('fb.limits')}</p>
     </Card>
   );

@@ -33,6 +33,8 @@ export interface LabText {
   totalTitle: string; totalLine: string; totalNote: string;
   modelTitle: string; model: string[];
   reflectTitle: string; reflectPrompt: string;
+  choose: string; numberHint: string; answered: string; capNote: string;
+  earlierTitle: string; earlierNote: string; earlierLine: string; earlierRestore: string;
   save: string; saveFailed: string; history: string; historyLine: string; revise: string; back: string; next: string; previous: string; showHint: string; checkNow: string; hubBack: string;
 }
 

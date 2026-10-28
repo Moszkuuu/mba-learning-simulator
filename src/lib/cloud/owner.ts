@@ -5,6 +5,7 @@
  */
 import { loadProgress, getStorage } from '../backup';
 import { reducer, STORAGE_KEY, type Action, type Progress } from '../progress';
+import { applyProgressReset, type Tombstone } from '../reset';
 import { mergeProgress, sameProgress } from './merge';
 
 export type Owner = { kind: 'guest' } | { kind: 'user'; id: string; email: string };
@@ -16,7 +17,9 @@ export const ownerId = (o: Owner): string => (o.kind === 'guest' ? 'guest' : o.i
 
 export interface Session { owner: Owner; progress: Progress; issue: ReturnType<typeof loadProgress>['issue'] }
 /** 'mergeIn' unions another copy of the SAME person's progress (a cloud result, or guest progress they chose to copy). */
-export type SessionAction = Action | { type: 'switchOwner'; owner: Owner; storage?: Storage | null } | { type: 'mergeIn'; progress: Progress };
+export type SessionAction = Action | { type: 'switchOwner'; owner: Owner; storage?: Storage | null } | { type: 'mergeIn'; progress: Progress }
+  /** Adopt a reset made on another device (or this one): delete progress made at or before the cutoff. */
+  | { type: 'applyReset'; tombstone: Tombstone; clearSim: boolean };
 
 export function openOwner(owner: Owner, storage: Storage | null = getStorage()): Session {
   const { progress, issue } = loadProgress(storage, storageKeyFor(owner));
@@ -29,6 +32,10 @@ export function sessionReducer(s: Session, a: SessionAction): Session {
     const merged = mergeProgress(s.progress, a.progress);
     // Return the same state when nothing is new, otherwise every sync would trigger the next one.
     return sameProgress(merged, s.progress) ? s : { ...s, progress: merged };
+  }
+  if (a.type === 'applyReset') {
+    const cleared = applyProgressReset(s.progress, a.tombstone, a.clearSim);
+    return cleared === s.progress ? s : { ...s, progress: cleared };
   }
   const progress = reducer(s.progress, a);
   return progress === s.progress ? s : { ...s, progress };

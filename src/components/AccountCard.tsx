@@ -5,15 +5,24 @@ import { signOut } from '../lib/cloud/auth';
 import { useI18n } from '../i18n';
 
 /** Offer to copy this browser's guest progress into the signed-in account (never automatic; the guest copy is kept). */
-export function GuestOffer() {
-  const { guestOffer, copyGuest } = useProgress();
+export function GuestOffer({ labOnly = false }: { labOnly?: boolean }) {
+  const { guestOffer, copyGuest, guestLabOffer, copyGuestLab } = useProgress();
   const { t } = useI18n();
-  if (!guestOffer) return null;
   return (
-    <div className="mt-3"><Alert tone="blue" title={t('acct.guestOfferTitle')}>
-      {t('acct.guestOfferBody', { attempts: guestOffer.attempts, lessons: guestOffer.completedLessons })}
-      <div className="mt-2"><Button onClick={copyGuest}>{t('acct.copyGuest')}</Button></div>
-    </Alert></div>
+    <>
+      {!labOnly && guestOffer && (
+        <div className="mt-3"><Alert tone="blue" title={t('acct.guestOfferTitle')}>
+          {t('acct.guestOfferBody', { attempts: guestOffer.attempts, lessons: guestOffer.completedLessons })}
+          <div className="mt-2"><Button onClick={copyGuest}>{t('acct.copyGuest')}</Button></div>
+        </Alert></div>
+      )}
+      {guestLabOffer && (
+        <div className="mt-3"><Alert tone="blue" title={t('acct.guestLabTitle')}>
+          {t('acct.guestLabBody', { submissions: guestLabOffer.submissions, drafts: guestLabOffer.drafts })}
+          <div className="mt-2"><Button onClick={copyGuestLab}>{t('acct.copyGuestLab')}</Button></div>
+        </Alert></div>
+      )}
+    </>
   );
 }
 

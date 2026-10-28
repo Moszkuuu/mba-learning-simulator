@@ -118,6 +118,7 @@ export default function LessonPage({ id }: { id: string }) {
           <H2>{t('lesson.objectives')}</H2>
           <ul className="list-inside list-disc space-y-1 text-slate-700">{lesson.objectives.map((o) => <li key={o}>{o}</li>)}</ul>
         </Card>
+        {tc && <Alert tone="blue">{t('lesson.howTo')}</Alert>}
         {tc && (
           <Card>
             <H2>{t('lesson.why')}</H2>

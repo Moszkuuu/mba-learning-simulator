@@ -3,8 +3,9 @@ import { getLessons, getQuestion } from '../content';
 import { COMPETENCIES, competencyById } from '../curriculum/program';
 import { competencyStats } from '../lib/progress';
 import { storageKeyFor } from '../lib/cloud/owner';
-import { backupFileName, commitImport, hasProgress, parseBackup, serializeBackup, summarizeProgress, type BackupResult } from '../lib/backup';
+import { backupFileName, commitImport, getStorage, hasProgress, parseBackup, serializeBackup, summarizeProgress, type BackupResult } from '../lib/backup';
 import { useProgress } from '../components/ProgressContext';
+import { LAB_CHANGED, LAB_SYNCED, adoptLab, labKey, loadLab, mergeLab, saveLab, summarizeLab } from '../lib/lab';
 import { ActivityList } from '../components/ActivityList';
 import { Alert, Badge, Button, Card, H2, PageTitle, Link } from '../components/ui';
 import { money } from '../lib/numeric';
@@ -13,9 +14,9 @@ import { useI18n } from '../i18n';
 const TONE = { mastered: 'green', learning: 'indigo', weak: 'red', stale: 'amber', new: 'slate' } as const;
 
 export default function ProgressPage() {
-  const { progress, dispatch, replace, owner } = useProgress();
+  const { progress, replace, owner, resetProgress, resetLabWork, resetAll } = useProgress();
   const { t, lang, date } = useI18n();
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<'progress' | 'lab' | 'all' | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, setPending] = useState<{ fileName: string; result: Extract<BackupResult, { ok: true }> } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -25,7 +26,8 @@ export default function ProgressPage() {
 
   function exportJson() {
     try {
-      const blob = new Blob([serializeBackup(progress)], { type: 'application/json' });
+      const lab = loadLab(getStorage() ?? undefined, labKey(storageKeyFor(owner)));
+      const blob = new Blob([serializeBackup(progress, new Date(), lab)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -56,11 +58,31 @@ export default function ProgressPage() {
 
   function confirmImport() {
     if (!pending) return;
-    // Save first: only report success (and replace what is on screen) if the browser really stored it.
-    if (!commitImport(pending.result.progress, undefined, storageKeyFor(owner)).ok) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
-    replace(pending.result.progress);
+    const { progress: imported, lab } = pending.result;
+    // A file that holds only Consulting Lab work must never replace (and so empty) the current progress.
+    if (hasProgress(imported)) {
+      // Save first: only report success (and replace what is on screen) if the browser really stored it.
+      if (!commitImport(imported, undefined, storageKeyFor(owner)).ok) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
+      replace(imported);
+    }
+    if (lab) {
+      // Lab work from a file is merged into the current Lab work (newer drafts win, older ones are kept), never replaced.
+      const store = getStorage() ?? undefined;
+      const key = labKey(storageKeyFor(owner));
+      if (!saveLab(store, key, mergeLab(loadLab(store, key), adoptLab(lab)))) { setMessage({ ok: false, text: t('backup.err.saveFail') }); return; }
+      window.dispatchEvent(new Event(LAB_SYNCED));
+      window.dispatchEvent(new Event(LAB_CHANGED));
+    }
     setPending(null);
     setMessage({ ok: true, text: t('prog.importOk') });
+  }
+
+  const labCounts = summarizeLab(loadLab(getStorage() ?? undefined, labKey(storageKeyFor(owner))));
+  function doReset(kind: 'progress' | 'lab' | 'all') {
+    (kind === 'progress' ? resetProgress : kind === 'lab' ? resetLabWork : resetAll)();
+    setConfirming(null);
+    setPending(null);
+    setMessage({ ok: true, text: t('reset.done') });
   }
 
   const current = summarizeProgress(progress);
@@ -181,9 +203,10 @@ export default function ProgressPage() {
                   <tr><td className="py-1">{t('backup.last')}</td><td>{pending.result.summary.lastActivity ? date(pending.result.summary.lastActivity) : '-'}</td><td>{current.lastActivity ? date(current.lastActivity) : '-'}</td></tr>
                 </tbody>
               </table>
-              {hasCurrent && <Alert tone="amber" title={t('backup.replaceTitle')}>{t('backup.replaceWarning')}</Alert>}
+              {pending.result.lab && <p className="mb-2 text-sm text-slate-700">{t('backup.lab', summarizeLab(pending.result.lab))}</p>}
+              {hasCurrent && hasProgress(pending.result.progress) && <Alert tone="amber" title={t('backup.replaceTitle')}>{t('backup.replaceWarning')}</Alert>}
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button tone={hasCurrent ? 'danger' : 'primary'} onClick={confirmImport}>{hasCurrent ? t('backup.confirmReplace') : t('backup.confirmRestore')}</Button>
+                <Button tone={hasCurrent && hasProgress(pending.result.progress) ? 'danger' : 'primary'} onClick={confirmImport}>{!hasProgress(pending.result.progress) ? t('backup.confirmLabOnly') : hasCurrent ? t('backup.confirmReplace') : t('backup.confirmRestore')}</Button>
                 {hasCurrent && <Button tone="secondary" onClick={exportJson}>{t('backup.downloadCurrent')}</Button>}
                 <Button tone="secondary" onClick={() => setPending(null)}>{t('common.cancel')}</Button>
               </div>
@@ -191,18 +214,26 @@ export default function ProgressPage() {
           )}
         </Card>
         <Card className="border-red-200 lg:col-span-2">
-          <H2>{t('prog.resetTitle')}</H2>
-          <p className="mb-3 text-sm text-slate-600">{t('prog.resetBody')}</p>
-          {confirming ? (
-            <Alert tone="red" title={t('prog.sure')}>
-              <div className="mt-2 flex gap-2">
-                <Button tone="danger" onClick={() => { dispatch({ type: 'reset' }); setConfirming(false); }}>{t('prog.confirmReset')}</Button>
-                <Button tone="secondary" onClick={() => setConfirming(false)}>{t('common.cancel')}</Button>
+          <H2>{t('reset.title')}</H2>
+          <p className="mb-3 text-sm text-slate-600">{t('reset.intro')} {owner.kind === 'user' ? t('reset.whereAccount') : t('reset.whereGuest')}</p>
+          <div className="space-y-3">
+            {(['progress', 'lab', 'all'] as const).map((kind) => (
+              <div key={kind} className="rounded-lg border border-slate-200 p-3">
+                <p className="text-sm text-slate-700">{kind === 'progress' ? t('reset.progress.body', { attempts: current.attempts, lessons: current.completedLessons }) : kind === 'lab' ? t('reset.lab.body', labCounts) : t('reset.all.body')}</p>
+                {confirming === kind ? (
+                  <Alert tone="red" title={t('reset.confirmQ')}>
+                    <p>{owner.kind === 'user' ? t('reset.effectAccount') : t('reset.effectGuest')}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button tone="danger" onClick={() => doReset(kind)}>{t(`reset.confirm.${kind}` as 'reset.confirm.all')}</Button>
+                      {kind !== 'lab' && <Button tone="secondary" onClick={exportJson}>{t('backup.downloadCurrent')}</Button>}
+                      <Button tone="secondary" onClick={() => setConfirming(null)}>{t('common.cancel')}</Button>
+                    </div>
+                  </Alert>
+                ) : <div className="mt-2"><Button tone="danger" onClick={() => setConfirming(kind)}>{t(`reset.${kind}.button` as 'reset.all.button')}</Button></div>}
               </div>
-            </Alert>
-          ) : <Button tone="danger" onClick={() => setConfirming(true)}>{t('prog.resetButton')}</Button>}
-        </Card>
-      </div>
+            ))}
+          </div>
+        </Card>      </div>
     </div>
   );
 }

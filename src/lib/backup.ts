@@ -5,6 +5,7 @@
  * the v1 schema) is still accepted on import.
  */
 import { emptyProgress, parseProgress, STORAGE_KEY, type Progress } from './progress';
+import { hasLabContent, parseLab, withoutReset, type LabState } from './lab';
 
 export const BACKUP_FORMAT = 'mba-lab-progress-backup';
 export const BACKUP_FORMAT_VERSION = 1;
@@ -14,13 +15,15 @@ export interface BackupFile {
   formatVersion: typeof BACKUP_FORMAT_VERSION;
   exportedAt: string;
   progress: Progress;
+  /** Consulting Lab work. Optional, so older backup files stay valid and older app versions simply ignore it. */
+  lab?: LabState;
 }
 
-export function createBackup(progress: Progress, now = new Date()): BackupFile {
-  return { format: BACKUP_FORMAT, formatVersion: BACKUP_FORMAT_VERSION, exportedAt: now.toISOString(), progress };
+export function createBackup(progress: Progress, now = new Date(), lab?: LabState): BackupFile {
+  return { format: BACKUP_FORMAT, formatVersion: BACKUP_FORMAT_VERSION, exportedAt: now.toISOString(), progress, ...(lab && hasLabContent(lab) ? { lab: withoutReset(lab) } : {}) };
 }
 
-export const serializeBackup = (progress: Progress, now = new Date()): string => JSON.stringify(createBackup(progress, now), null, 2);
+export const serializeBackup = (progress: Progress, now = new Date(), lab?: LabState): string => JSON.stringify(createBackup(progress, now, lab), null, 2);
 
 export const backupFileName = (now = new Date()): string => `mba-lab-progress-${now.toISOString().slice(0, 10)}.json`;
 
@@ -53,7 +56,7 @@ export const hasProgress = (p: Progress): boolean =>
 
 export type BackupError = 'invalidJson' | 'notBackup' | 'unsupportedVersion' | 'malformed' | 'empty';
 export type BackupResult =
-  | { ok: true; progress: Progress; summary: ProgressSummary; exportedAt: string | null; upgraded: boolean }
+  | { ok: true; progress: Progress; summary: ProgressSummary; exportedAt: string | null; upgraded: boolean; lab: LabState | null }
   | { ok: false; error: BackupError; detail?: string };
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -115,8 +118,15 @@ export function parseBackup(text: string): BackupResult {
   } else {
     return { ok: false, error: 'unsupportedVersion', detail: String(raw.version) };
   }
-  if (!hasProgress(progress)) return { ok: false, error: 'empty' };
-  return { ok: true, progress, summary: summarizeProgress(progress), exportedAt, upgraded };
+  // Consulting Lab work travels next to the progress. Present-but-invalid Lab data rejects the file rather than being half-restored.
+  let lab: LabState | null = null;
+  if (data.lab !== undefined && data.lab !== null) {
+    lab = parseLab(data.lab);
+    if (!lab) return fail('lab');
+    if (!hasLabContent(lab)) lab = null;
+  }
+  if (!hasProgress(progress) && !lab) return { ok: false, error: 'empty' };
+  return { ok: true, progress, summary: summarizeProgress(progress), exportedAt, upgraded, lab };
 }
 
 // ---------- storage ----------

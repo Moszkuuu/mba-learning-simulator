@@ -30,7 +30,7 @@ export function HomeHero({ continueTo, started }: { continueTo: string; started:
       <div className="mt-4 flex flex-wrap gap-3">
         {started
           ? <LinkButton to={continueTo}>{t('home.continue')}</LinkButton>
-          : <LinkButton to="/courses">{t('home.guest')}</LinkButton>}
+          : <LinkButton to={continueTo}>{t('home.startGuest')}</LinkButton>}
         {cloudConfigured && <LinkButton to="/login" tone="secondary">{t('auth.loginTitle')}</LinkButton>}
         {cloudConfigured && <LinkButton to="/signup" tone="secondary">{t('acct.signUp')}</LinkButton>}
       </div>

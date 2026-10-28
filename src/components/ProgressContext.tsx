@@ -6,6 +6,8 @@ import { cloudConfigured, getClient, storeFor } from '../lib/cloud/client';
 import { syncProgress } from '../lib/cloud/sync';
 import { createSyncRunner } from '../lib/cloud/runner';
 import { startRecoverySession, takePendingRecovery } from '../lib/cloud/auth';
+import { LAB_CHANGED, LAB_SYNCED, adoptLab, hasLabContent, labKey, loadLab, mergeLab, resetLabState, sameLab, saveLab, summarizeLab } from '../lib/lab';
+import { isRestore, parseTombstone, resetMarker, restoreMarker, sameTombstone, type Tombstone } from '../lib/reset';
 
 export type SyncStatus = 'off' | 'idle' | 'syncing' | 'synced' | 'offline' | 'needsLogin' | 'blocked' | 'error';
 
@@ -20,6 +22,13 @@ interface Ctx {
   /** Guest progress on this browser that has not been copied into the signed-in account yet (summary), else null. */
   guestOffer: ProgressSummary | null;
   copyGuest: () => void;
+  /** Guest Consulting Lab work on this browser not yet copied into the signed-in account (counts), else null. */
+  guestLabOffer: { submissions: number; drafts: number } | null;
+  copyGuestLab: () => void;
+  /** The three deliberate resets. Each affects only the current account (or the guest profile) and follows the account to its other devices. */
+  resetProgress: () => void;
+  resetLabWork: () => void;
+  resetAll: () => void;
   /** Password-reset link state: 'ready' = choose a new password, 'failed' = the link did not work. */
   recovery: 'none' | 'ready' | 'expired' | 'invalid';
   endRecovery: () => void;
@@ -28,7 +37,12 @@ const C = createContext<Ctx | null>(null);
 
 const pendingKey = (o: Owner) => `${storageKeyFor(o)}:pending-overwrite`;
 const copiedKey = (id: string) => `${STORAGE_KEY}:guest-copied:${id}`;
+const labCopiedKey = (id: string) => `${STORAGE_KEY}:guest-lab-copied:${id}`;
 let overwriteCounter = 0;
+/** The deletion marker for this person's progress, kept next to their progress in their own storage key. */
+const tombKey = (o: Owner) => `${storageKeyFor(o)}:reset`;
+const loadTomb = (o: Owner): Tombstone | undefined => { try { return parseTombstone(JSON.parse(getStorage()?.getItem(tombKey(o)) ?? 'null')); } catch { return undefined; } };
+const saveTomb = (o: Owner, t: Tombstone) => { try { getStorage()?.setItem(tombKey(o), JSON.stringify(t)); } catch { /* the cloud copy still carries it */ } };
 const safe = <T,>(fn: () => T, fallback: T): T => { try { return fn(); } catch { return fallback; } };
 
 function rememberedOwner(): Owner {
@@ -44,6 +58,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [saveIssue, setSaveIssue] = useState<StorageIssue | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(cloudConfigured ? 'idle' : 'off');
   const [guestOffer, setGuestOffer] = useState<ProgressSummary | null>(null);
+  const [guestLabOffer, setGuestLabOffer] = useState<{ submissions: number; drafts: number } | null>(null);
   const [recovery, setRecovery] = useState<'none' | 'ready' | 'expired' | 'invalid'>('none');
   const { owner, progress } = session;
 
@@ -90,6 +105,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const copied = safe(() => getStorage()?.getItem(copiedKey(owner.id)) === '1', false);
     const guest = loadProgress(getStorage(), STORAGE_KEY).progress;
     setGuestOffer(!copied && hasProgress(guest) ? summarizeProgress(guest) : null);
+    const labCopied = safe(() => getStorage()?.getItem(labCopiedKey(owner.id)) === '1', false);
+    const guestLab = loadLab(getStorage() ?? undefined, labKey(STORAGE_KEY));
+    setGuestLabOffer(!labCopied && hasLabContent(guestLab) ? summarizeLab(guestLab) : null);
   }, [owner]);
 
   // ---- cloud sync (signed-in only) ----
@@ -104,7 +122,25 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         const o = latest.current.owner;
         const c = getClient();
         if (!c || o.kind !== 'user') return Promise.reject(new Error('not signed in'));
-        return syncProgress(local, storeFor(c, o.id), mode);
+        // Consulting Lab work rides along in the same cloud row. It is merged (never replaced), and what comes back is merged with
+        // whatever the student typed while the round was running before it is saved, so no edit can be lost.
+        const store = getStorage() ?? undefined;
+        const key = labKey(storageKeyFor(o));
+        const knownReset = loadTomb(o);
+        return syncProgress(local, storeFor(c, o.id), mode, loadLab(store, key), knownReset).then((r) => {
+          // A reset made on another device: remember it and delete the older progress here too (only if this is still the same person).
+          if (r.reset && !sameTombstone(r.reset, knownReset)) {
+            saveTomb(o, r.reset);
+            const now = latest.current.owner;
+            if (!isRestore(r.reset) && now.kind === 'user' && now.id === o.id) dispatchSession({ type: 'applyReset', tombstone: r.reset, clearSim: r.adoptedReset });
+          }
+          if (r.lab) {
+            const current = loadLab(store, key);
+            const merged = mergeLab(current, r.lab);
+            if (!sameLab(merged, current) && saveLab(store, key, merged)) window.dispatchEvent(new Event(LAB_SYNCED));
+          }
+          return r;
+        });
       },
       apply: (p) => dispatchSession({ type: 'mergeIn', progress: p }),
       setStatus: setSyncStatus,
@@ -120,6 +156,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, [progress, ownerKey, runSync]);
   useEffect(() => {
     if (!ownerKey) return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const onLab = () => { clearTimeout(t); t = setTimeout(() => void runSync(), 1500); };
+    window.addEventListener(LAB_CHANGED, onLab);
+    return () => { clearTimeout(t); window.removeEventListener(LAB_CHANGED, onLab); };
+  }, [ownerKey, runSync]);
+  useEffect(() => {
+    if (!ownerKey) return;
     const go = () => void runSync();
     window.addEventListener('online', go);
     window.addEventListener('focus', go);
@@ -132,6 +175,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     if ((a.type === 'reset' || a.type === 'replace') && latest.current.owner.kind === 'user') {
       const o = latest.current.owner;
       safe(() => getStorage()?.setItem(pendingKey(o), `${Date.now()}-${++overwriteCounter}`), undefined);
+      // A reset leaves a marker so other devices (even offline ones) delete their older copies instead of bringing them back.
+      // Restoring a backup over a reset leaves a "restore" marker that deletes nothing and supersedes the earlier reset.
+      saveTomb(o, a.type === 'reset' ? resetMarker() : restoreMarker());
     }
     dispatchSession(a);
   }, []);
@@ -140,13 +186,41 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const o = latest.current.owner;
     if (o.kind !== 'user') return;
     dispatchSession({ type: 'mergeIn', progress: loadProgress(getStorage(), STORAGE_KEY).progress });
+    // If this account was reset, the student's explicit choice to copy guest progress in must not be deleted by that reset.
+    const reset = loadTomb(o);
+    if (reset && !isRestore(reset)) saveTomb(o, restoreMarker());
     safe(() => getStorage()?.setItem(copiedKey(o.id), '1'), undefined);
     setGuestOffer(null);
   }, []);
 
+  /** Copies guest Consulting Lab work into the signed-in account (merged, never replacing). The guest copy stays on this browser. */
+  const copyGuestLab = useCallback(() => {
+    const o = latest.current.owner;
+    if (o.kind !== 'user') return;
+    const store = getStorage() ?? undefined;
+    const key = labKey(storageKeyFor(o));
+    // Stamped as made now (so an earlier Lab reset does not delete it) and without the guest's own deletion marker.
+    const merged = mergeLab(loadLab(store, key), adoptLab(loadLab(store, labKey(STORAGE_KEY))));
+    if (!saveLab(store, key, merged)) return; // not saved: keep the offer so the student can try again
+    safe(() => getStorage()?.setItem(labCopiedKey(o.id), '1'), undefined);
+    setGuestLabOffer(null);
+    window.dispatchEvent(new Event(LAB_SYNCED));
+    window.dispatchEvent(new Event(LAB_CHANGED));
+  }, []);
+
+  const resetProgress = useCallback(() => dispatch({ type: 'reset' }), [dispatch]);
+  /** Deletes this person's Consulting Lab work. Signed in: a marker is left so it is also deleted on their other devices. */
+  const resetLabWork = useCallback(() => {
+    const o = latest.current.owner;
+    if (!saveLab(getStorage() ?? undefined, labKey(storageKeyFor(o)), resetLabState(o.kind === 'user'))) return;
+    window.dispatchEvent(new Event(LAB_SYNCED));
+    window.dispatchEvent(new Event(LAB_CHANGED));
+  }, []);
+  const resetAll = useCallback(() => { resetProgress(); resetLabWork(); }, [resetProgress, resetLabWork]);
+
   const storageIssue = session.issue ?? saveIssue;
   return (
-    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, recovery, endRecovery: () => setRecovery('none') }}>
+    <C.Provider value={{ progress, dispatch, replace, storageIssue, owner, syncStatus, syncNow: () => void runSync(), guestOffer, copyGuest, guestLabOffer, copyGuestLab, resetProgress, resetLabWork, resetAll, recovery, endRecovery: () => setRecovery('none') }}>
       {children}
     </C.Provider>
   );

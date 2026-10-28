@@ -59,7 +59,8 @@ describe('Consulting Lab wording', () => {
     const t = labEn.hubAssess.join(' ');
     expect(t).toMatch(/NOT graded/);
     expect(t).toMatch(/self-assessed/);
-    expect(t).toMatch(/this browser only/);
+    expect(t).toMatch(/saved in this browser/);
+    expect(t).toMatch(/saved to your account/);
     expect(labEn.totalNote).toMatch(/Only the first part is verified/);
   });
 });

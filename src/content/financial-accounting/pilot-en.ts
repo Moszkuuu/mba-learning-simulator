@@ -72,7 +72,7 @@ export const pilotLessons: Record<string, LessonText> = {
         { term: 'COGS (cost of goods sold)', meaning: 'What the products you actually sold cost you to buy or make.' },
         { term: 'Gross profit', meaning: 'What is left after paying for the goods: revenue minus COGS.' },
         { term: 'Operating profit (EBIT)', meaning: 'Profit from running the business, before interest and tax.' },
-        { term: 'Net profit', meaning: 'What belongs to the owners after everything, including interest and tax.' },
+        { term: 'Net profit', meaning: 'What belongs to the owners after everything, including interest and tax. Many books call it net income.' },
         { term: 'Accrual basis', meaning: 'Record a sale or a cost when it happens, not when cash moves.' },
       ],
       interpretation: [
@@ -162,7 +162,8 @@ export const pilotLessons: Record<string, LessonText> = {
     teaching: {
       why: 'A profitable business can still run out of cash, because growth, slow customers and unsold stock tie money up. A manager who understands the cash conversion cycle can free cash without borrowing, and a lender looks at it to judge whether a loan will be repaid.',
       terms: [
-        { term: 'Receivables', meaning: 'Money customers owe you for sales already made.' },
+        { term: 'Receivables', meaning: 'Money customers owe you for sales already made (accounts receivable).' },
+        { term: 'Inventory', meaning: 'Goods held for sale. This course also calls it stock.' },
         { term: 'DSO', meaning: 'Days sales outstanding: the average number of days customers take to pay.' },
         { term: 'DIO', meaning: 'Days inventory outstanding: the average number of days stock waits before it is sold.' },
         { term: 'DPO', meaning: 'Days payables outstanding: the average number of days you take to pay suppliers.' },
@@ -255,6 +256,7 @@ export const pilotLessons: Record<string, LessonText> = {
       why: 'Employees, suppliers and banks are paid in cash, not in profit. A business can report a profit every year and still be unable to pay its wages. Operating cash flow tells you whether the business can fund itself or must keep borrowing.',
       terms: [
         { term: 'Operating cash flow (OCF)', meaning: 'Cash made or used by the day-to-day business.' },
+        { term: 'Net profit', meaning: 'Profit after all costs, interest and tax. Many books call it net income, and some questions use that name.' },
         { term: 'Non-cash expense', meaning: 'A cost in the profit figure that took no cash out this year, such as depreciation.' },
         { term: 'Indirect method', meaning: 'Start from net profit and adjust for timing differences.' },
         { term: 'Direct method', meaning: 'List the cash received and the cash paid.' },

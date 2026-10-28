@@ -3,7 +3,7 @@
  * rules in docs/CLOUD_SETUP.md). If they are not configured the app runs exactly as before, local-only.
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { CloudStore } from './sync';
+import type { CloudData, CloudStore } from './sync';
 import type { Progress } from '../progress';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -42,13 +42,13 @@ export function storeFor(c: SupabaseClient, userId: string): CloudStore {
       if (error) throw error;
       return data ? { data: data.data, revision: Number(data.revision) } : null;
     },
-    async insert(data: Progress) {
+    async insert(data: CloudData) {
       const { error } = await c.from('progress').insert({ user_id: userId, data, revision: 1 });
       if (!error) return 'ok';
       if (error.code === '23505') return 'conflict'; // row appeared meanwhile (another device)
       throw error;
     },
-    async update(data: Progress, expectedRevision: number) {
+    async update(data: CloudData, expectedRevision: number) {
       const { data: rows, error } = await c
         .from('progress')
         .update({ data, revision: expectedRevision + 1, updated_at: new Date().toISOString() })
