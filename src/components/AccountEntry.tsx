@@ -47,6 +47,7 @@ export function ToolLinks() {
       <a className="font-medium text-indigo-700 underline" href="#/review">{t('nav.review')}</a>
       <a className="font-medium text-indigo-700 underline" href="#/simulator">{t('nav.simulator')}</a>
       <a className="font-medium text-indigo-700 underline" href="#/glossary">{t('nav.glossary')}</a>
+      <a className="font-medium text-indigo-700 underline" href="#/lab">{t('nav.lab')}</a>
     </div>
   );
 }

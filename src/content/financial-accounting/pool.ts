@@ -9,6 +9,7 @@ import { part4 } from './pool-4';
 import { part5 } from './pool-5';
 import { part6 } from './pool-6';
 import { part7 } from './pool-7';
+import { part8 } from './pool-8';
 
 const pool = new Pool(LESSON_KEYS);
 part1(pool);
@@ -20,6 +21,7 @@ part4(pool);
 part5(pool);
 part6(pool);
 part7(pool);
+part8(pool);
 
 export const POOL_KEYS = pool.keys;
 export const poolEn = pool.en;

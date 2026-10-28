@@ -53,7 +53,7 @@ export const subjectOfLesson = (lessonId: string): string | undefined =>
 function resolveQuestion(k: QuestionKey, lang: Lang, subject: SubjectContent): Question {
   const t = subject.text[lang].questions[k.id];
   if (!t) throw new Error(`Missing ${lang} text for question ${k.id}`);
-  const base = { id: k.id, lessonId: k.lessonId, level: k.level, competency: k.competency, concept: t.concept, prompt: t.prompt, scenario: t.scenario, explanation: t.explanation };
+  const base = { id: k.id, lessonId: k.lessonId, level: k.level, skill: k.skill, competency: k.competency, concept: t.concept, prompt: t.prompt, scenario: t.scenario, explanation: t.explanation };
   if (k.type === 'mcq') return { ...base, type: 'mcq', options: t.options ?? [], correctIndex: k.correctIndex };
   if (k.type === 'numeric') return { ...base, type: 'numeric', answer: k.answer, unit: k.unit, tolerance: k.tolerance, commonMistake: t.commonMistake };
   return { ...base, type: 'written', modelAnswer: t.modelAnswer ?? '', rubric: t.rubric ?? [] };

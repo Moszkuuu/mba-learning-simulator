@@ -5,7 +5,7 @@
  * written first; the helper places it at a rotating position (the quiz shuffles options at run time anyway).
  * Numeric answers are computed by the caller from the engines, and explanations are built from the computed value.
  */
-import type { Level, LessonKey, McqKey, NumericKey, OptionText, QuestionKey, QuestionText } from './types';
+import type { Level, LessonKey, McqKey, NumericKey, OptionText, QuestionKey, QuestionText, Skill } from './types';
 import type { Tolerance, Unit } from '../lib/numeric';
 
 export type Opt = [text: string, why: string];
@@ -28,7 +28,7 @@ export class Pool {
     return { id: `${lessonId.split('-')[0]}p${String(n).padStart(2, '0')}`, competency: lk.competencies[0], n };
   }
 
-  mcq(lessonId: string, level: Level, en: McqText, th: McqText, competency?: string): void {
+  mcq(lessonId: string, level: Level, en: McqText, th: McqText, competency?: string, skill?: Skill): void {
     const { id, competency: c, n } = this.next(lessonId);
     const pos = n % 4;
     const build = (t: McqText): QuestionText => {
@@ -37,15 +37,15 @@ export class Pool {
       opts.splice(pos, 0, { text: t.correct[0], why: t.correct[1] });
       return { concept: t.concept, prompt: t.prompt, scenario: t.scenario, explanation: t.explanation, options: opts };
     };
-    const key: McqKey = { id, lessonId, level, competency: competency ?? c, type: 'mcq', correctIndex: pos, optionCount: 4 };
+    const key: McqKey = { id, lessonId, level, competency: competency ?? c, type: 'mcq', correctIndex: pos, optionCount: 4, ...(skill ? { skill } : {}) };
     this.keys.push(key);
     this.en[id] = build(en);
     this.th[id] = build(th);
   }
 
-  num(lessonId: string, level: Level, unit: Unit, answer: number, en: NumText, th: NumText, tolerance?: Tolerance, competency?: string): void {
+  num(lessonId: string, level: Level, unit: Unit, answer: number, en: NumText, th: NumText, tolerance?: Tolerance, competency?: string, skill?: Skill): void {
     const { id, competency: c } = this.next(lessonId);
-    const key: NumericKey = { id, lessonId, level, competency: competency ?? c, type: 'numeric', answer, unit, tolerance };
+    const key: NumericKey = { id, lessonId, level, competency: competency ?? c, type: 'numeric', answer, unit, tolerance, ...(skill ? { skill } : {}) };
     this.keys.push(key);
     this.en[id] = { ...en };
     this.th[id] = { ...th };

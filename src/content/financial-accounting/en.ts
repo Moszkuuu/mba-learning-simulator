@@ -1,4 +1,4 @@
-﻿import type { LessonText, QuestionText } from '../types';
+import type { LessonText, QuestionText } from '../types';
 import { newLessons, newQuestions } from './en-new';
 
 export const lessons: Record<string, LessonText> = {
@@ -35,44 +35,6 @@ export const lessons: Record<string, LessonText> = {
       result: 'Gross profit $280,000 (35% margin): each $1 of sales leaves 35 cents for overheads and profit.',
     }],
   },
-  'l2-operating-profit': {
-    title: 'Operating Profit and Profit Margins',
-    summary: 'What remains after running the business - and how to compare margins.',
-    objectives: [
-      'Separate operating items from financing and tax items on an income statement.',
-      'Calculate operating profit, net profit and their margins.',
-      'Compare the cost structures of two firms using margins.',
-    ],
-    explanation: [
-      'Operating expenses (OpEx) are the costs of running the business that are not in COGS: salaries, rent, marketing, utilities, depreciation, bad-debt expense.',
-      'Operating profit (EBIT) = gross profit - operating expenses. It measures how profitable core operations are before financing and tax.',
-      'Net profit is what remains after interest and income tax. Each profit level has its own margin: gross, operating and net margin - all as a percentage of revenue.',
-      'Comparing gross and operating margins reveals where a business is strong: a high gross margin with a thin operating margin means overheads are consuming the gain.',
-    ],
-    formulas: [
-      { name: 'Operating profit', expr: 'Operating Profit = Gross Profit - Operating Expenses' },
-      { name: 'Operating margin %', expr: 'Operating Margin % = Operating Profit / Revenue x 100' },
-      { name: 'Net profit', expr: 'Net Profit = Operating Profit - Interest - Tax' },
-      { name: 'Net margin %', expr: 'Net Margin % = Net Profit / Revenue x 100' },
-    ],
-    realWorld: 'Grocery chains typically earn gross margins near 25% but operating margins of only 2-4%: store labour, rent and logistics absorb nearly everything.',
-    misconceptions: [
-      'A high gross margin means a profitable business. Overheads can absorb all of it; compare operating margins as well.',
-      'Operating profit is cash earned. It is an accrual measure: depreciation, credit sales and inventory timing all separate it from cash.',
-      'Interest is an operating expense. Interest is a financing cost and sits below operating profit.',
-    ],
-    workedExamples: [{
-      title: 'Regional distributor, one year',
-      given: ['Revenue $1,200,000', 'COGS $780,000', 'Operating expenses $300,000', 'Interest $20,000', 'Tax rate 25%'],
-      steps: [
-        'Gross profit = 1,200,000 - 780,000 = $420,000',
-        'Operating profit = 420,000 - 300,000 = $120,000 (margin 10%)',
-        'Profit before tax = 120,000 - 20,000 = $100,000',
-        'Tax = 25% x 100,000 = $25,000, so net profit = $75,000 (net margin 6.25%)',
-      ],
-      result: 'Operating profit $120,000 (10%); net profit $75,000 (6.25%).',
-    }],
-  },
   'l3-ar-ap': {
     title: 'Accounts Receivable and Accounts Payable',
     summary: 'Credit given to customers and credit received from suppliers.',
@@ -103,76 +65,6 @@ export const lessons: Record<string, LessonText> = {
       given: ['Monthly revenue $200,000', 'Accounts receivable $400,000', 'Monthly COGS $130,000', 'Accounts payable $130,000', '30-day month'],
       steps: ['DSO = 400,000 / 200,000 x 30 = 60 days', 'DPO = 130,000 / 130,000 x 30 = 30 days'],
       result: 'Customers pay in 60 days but the firm pays suppliers in 30: it finances customers for 30 days from its own cash.',
-    }],
-  },
-  'l4-inventory-wc': {
-    title: 'Inventory and Working Capital',
-    summary: 'How cash is tied up in the operating cycle.',
-    objectives: [
-      'Calculate inventory turnover and days inventory outstanding.',
-      'Calculate trade working capital and the cash conversion cycle.',
-      'Evaluate which levers shorten the cash conversion cycle and what each costs.',
-    ],
-    explanation: [
-      'Inventory is an asset recorded at cost. Too little causes stock-outs and lost sales; too much ties up cash and adds storage, spoilage and obsolescence costs.',
-      'Inventory turnover shows how many times stock is sold and replaced in a period. Days Inventory Outstanding (DIO) is the same idea expressed in days.',
-      'Trade working capital = AR + inventory - AP: the cash the operating cycle needs to run. The Cash Conversion Cycle (CCC) = DIO + DSO - DPO is how many days cash is tied up between paying suppliers and collecting from customers.',
-      'Shortening the CCC releases cash without needing more profit: collect faster, hold less stock, or pay suppliers later.',
-    ],
-    formulas: [
-      { name: 'Inventory turnover', expr: 'Turnover = COGS / Average Inventory' },
-      { name: 'DIO', expr: 'DIO = Inventory / COGS x Days in Period' },
-      { name: 'Trade working capital', expr: 'Trade WC = AR + Inventory - AP' },
-      { name: 'Net working capital', expr: 'NWC = Current Assets - Current Liabilities' },
-      { name: 'Cash conversion cycle', expr: 'CCC = DIO + DSO - DPO' },
-    ],
-    realWorld: 'Dell famously ran a negative cash conversion cycle: customers paid up front while suppliers were paid weeks later, so growth generated cash instead of consuming it.',
-    misconceptions: [
-      'More inventory is always safer. Excess stock ties up cash and incurs storage, spoilage and obsolescence costs.',
-      'Working capital is an expense. It is an investment: cash tied up, recovered when the cycle shrinks.',
-      'A negative cash conversion cycle is impossible. It occurs when customers pay before suppliers are paid.',
-    ],
-    workedExamples: [{
-      title: 'Food distributor operating cycle',
-      given: ['Monthly COGS $130,000', 'Inventory $300,000', 'AR $400,000 (DSO 60 days)', 'AP $130,000 (DPO 30 days)'],
-      steps: [
-        'DIO = 300,000 / 130,000 x 30 = 69.2 days',
-        'CCC = 69.2 + 60 - 30 = 99.2 days',
-        'Trade working capital = 400,000 + 300,000 - 130,000 = $570,000',
-      ],
-      result: 'It takes about 99 days to turn a dollar paid to suppliers back into cash; $570,000 is tied up in the operating cycle.',
-    }],
-  },
-  'l5-operating-cash-flow': {
-    title: 'Operating Cash Flow',
-    summary: 'Why a profitable company can still run out of cash.',
-    objectives: [
-      'Reconcile net income to operating cash flow using the indirect method.',
-      'State the direction of cash effect for each working-capital change.',
-      'Calculate operating cash flow using the direct method.',
-      'Explain why a profitable company can run out of cash.',
-    ],
-    explanation: [
-      'Profit is an accounting measure built on accrual rules; cash flow is the actual movement of money. The two differ because of timing: credit sales, supplier credit, inventory purchases and non-cash charges.',
-      'The indirect method starts with net income, adds back non-cash expenses (depreciation) and adjusts for changes in working capital.',
-      'An increase in AR or inventory uses cash. An increase in AP provides cash. A decrease reverses each sign.',
-      'The direct method simply lists cash received from customers minus cash paid to suppliers, employees and lenders. Both methods give the same answer.',
-    ],
-    formulas: [
-      { name: 'Operating cash flow (indirect)', expr: 'OCF = Net Income + Depreciation - Increase in AR - Increase in Inventory + Increase in AP' },
-      { name: 'Operating cash flow (direct)', expr: 'OCF = Cash Collections - Supplier Payments - Cash Operating Expenses - Interest Paid' },
-    ],
-    realWorld: 'Fast-growing firms often fail despite reporting profits: each new sale adds receivables and inventory before the cash arrives ("growth eats cash").',
-    misconceptions: [
-      'Depreciation is a cash inflow. It is a non-cash expense that is added back to profit; no cash is received.',
-      'An increase in accounts payable is bad news. It is a source of cash because you have kept money you will pay later.',
-      'Positive profit implies positive cash flow. Growth in receivables and inventory can make operating cash flow negative.',
-    ],
-    workedExamples: [{
-      title: 'Growing wholesaler',
-      given: ['Net income $90,000', 'Depreciation $20,000', 'AR up $50,000', 'Inventory up $30,000', 'AP up $25,000'],
-      steps: ['OCF = 90,000 + 20,000 - 50,000 - 30,000 + 25,000 = $55,000'],
-      result: 'Profit is $90,000 but operating cash flow is only $55,000: working capital growth absorbed $55,000 (AR +50,000, inventory +30,000, AP -25,000), partly offset by the $20,000 depreciation add-back.',
     }],
   },
   'l6-break-even': {

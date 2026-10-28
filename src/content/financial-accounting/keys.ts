@@ -1,4 +1,4 @@
-﻿import type { LessonKey, QuestionKey } from '../types';
+import type { LessonKey, QuestionKey } from '../types';
 import { NEW_QUESTION_KEYS } from './keys-new';
 
 /** Language-neutral structure and answer keys for Financial Accounting. Shared by EN and TH. */
@@ -8,14 +8,14 @@ export const LESSON_KEYS: LessonKey[] = [
   { id: 'l49-accrual-recognition', number: 3, unitId: 'u2-accrual', minutes: 13, competencies: ['fa.accrual'], status: 'foundation' },
   { id: 'l50-adjusting-entries', number: 4, unitId: 'u2-accrual', minutes: 13, competencies: ['fa.accrual'], status: 'foundation' },
   { id: 'l1-gross-profit', number: 5, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
-  { id: 'l2-operating-profit', number: 6, unitId: 'u3-income-statement', minutes: 10, competencies: ['fa.financial-statements'], status: 'migrated' },
+  { id: 'l2-operating-profit', number: 6, unitId: 'u3-income-statement', minutes: 15, competencies: ['fa.financial-statements'], status: 'full' },
   { id: 'l3-ar-ap', number: 7, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
-  { id: 'l4-inventory-wc', number: 8, unitId: 'u4-balance-sheet-wc', minutes: 12, competencies: ['fa.working-capital'], status: 'migrated' },
+  { id: 'l4-inventory-wc', number: 8, unitId: 'u4-balance-sheet-wc', minutes: 16, competencies: ['fa.working-capital'], status: 'full' },
   { id: 'l51-inventory-costing', number: 9, unitId: 'u5-inventory', minutes: 14, competencies: ['fa.inventory-valuation'], status: 'foundation' },
   { id: 'l52-inventory-nrv-errors', number: 10, unitId: 'u5-inventory', minutes: 13, competencies: ['fa.inventory-valuation'], status: 'foundation' },
   { id: 'l53-depreciation', number: 11, unitId: 'u6-assets-financing', minutes: 14, competencies: ['fa.long-lived-assets'], status: 'foundation' },
   { id: 'l54-debt-equity', number: 12, unitId: 'u6-assets-financing', minutes: 14, competencies: ['fa.liabilities-equity'], status: 'foundation' },
-  { id: 'l5-operating-cash-flow', number: 13, unitId: 'u7-cash-flow', minutes: 12, competencies: ['fa.cash-flow'], status: 'migrated' },
+  { id: 'l5-operating-cash-flow', number: 13, unitId: 'u7-cash-flow', minutes: 16, competencies: ['fa.cash-flow'], status: 'full' },
   { id: 'l55-ratios-liquidity-profitability', number: 14, unitId: 'u8-analysis', minutes: 14, competencies: ['fa.ratio-analysis'], status: 'foundation' },
   { id: 'l56-ratios-efficiency-trend', number: 15, unitId: 'u8-analysis', minutes: 14, competencies: ['fa.ratio-analysis'], status: 'foundation' },
   { id: 'l57-earnings-quality', number: 16, unitId: 'u9-earnings-quality', minutes: 15, competencies: ['fa.earnings-quality'], status: 'foundation' },

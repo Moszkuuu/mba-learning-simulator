@@ -10,11 +10,16 @@ export type Lang = 'en' | 'th';
 export const LANGS: Lang[] = ['en', 'th'];
 export type Level = 1 | 2 | 3;
 
+/** What a question mainly tests. Untagged questions default to 'calculate' (numeric) or 'understand' (other). */
+export type Skill = 'understand' | 'calculate' | 'interpret' | 'decide' | 'assumptions';
+export const SKILLS: Skill[] = ['understand', 'calculate', 'interpret', 'decide', 'assumptions'];
+
 // ---------- language-neutral keys ----------
 interface KeyBase {
   id: string;
   lessonId: string;
   level: Level;
+  skill?: Skill;
   /** Competency id from curriculum/program.ts */
   competency: string;
 }
@@ -47,7 +52,19 @@ export interface QuestionText {
   rubric?: string[];
 }
 export interface WorkedExampleText { title: string; given: string[]; steps: string[]; result: string }
+/** Optional teaching sections used by lessons written to the full lesson standard (Phase 3.1 pilot). */
+export interface LessonTeaching {
+  why: string;
+  terms: { term: string; meaning: string }[];
+  interpretation: string[];
+  decisions: string[];
+  check: { q: string; a: string }[];
+  takeaways: string[];
+  /** A prompt for applying the idea to a real business the student knows. */
+  apply: string;
+}
 export interface LessonText {
+  teaching?: LessonTeaching;
   title: string;
   summary: string;
   objectives: string[];
@@ -70,6 +87,7 @@ interface QBase {
   id: string;
   lessonId: string;
   level: Level;
+  skill?: Skill;
   competency: string;
   concept: string;
   prompt: string;

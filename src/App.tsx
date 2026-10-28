@@ -11,6 +11,8 @@ import SimulatorPage from './pages/SimulatorPage';
 import ProgressPage from './pages/ProgressPage';
 import GlossaryPage from './pages/GlossaryPage';
 import { AccountCard } from './components/AccountCard';
+import LabPage from './pages/LabPage';
+import { LAB_LEVELS, type LabLevel } from './lab/case';
 import { ForgotPage, LoginPage, ResetPage, SignupPage } from './pages/AuthPages';
 import { NavAccount } from './components/AccountEntry';
 import { Alert, Card, H2, LinkButton } from './components/ui';
@@ -37,6 +39,8 @@ function Page({ path }: { path: string }) {
   if (path === '/simulator') return <SimulatorPage />;
   if (path === '/progress') return <ProgressPage />;
   if (path === '/account') return <AccountCard />;
+  if (path === '/lab') return <LabPage />;
+  if (path.startsWith('/lab/')) { const lv = path.slice('/lab/'.length); return LAB_LEVELS.includes(lv as LabLevel) ? <LabPage level={lv as LabLevel} /> : <LabPage />; }
   if (path === '/glossary') return <GlossaryPage />;
   return (
     <Card>

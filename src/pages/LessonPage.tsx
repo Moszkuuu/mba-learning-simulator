@@ -1,9 +1,10 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { ALL_LESSON_KEYS, getLesson, getLessons, reviseLessonFor, subjectOfLesson } from '../content';
 import { subjectById } from '../curriculum/program';
 import { competencyById } from '../curriculum/program';
 import { Alert, Badge, Card, H2, Link, LinkButton, PageTitle } from '../components/ui';
 import { QuizRunner, type QuizOutcome } from '../components/QuizRunner';
+import { QuizFeedback } from '../components/QuizFeedback';
 import { useProgress } from '../components/ProgressContext';
 import { useI18n } from '../i18n';
 import { competencyStats } from '../lib/progress';
@@ -32,6 +33,7 @@ export default function LessonPage({ id }: { id: string }) {
   const all = getLessons(lang).filter((l) => subjectOfLesson(l.id) === subjectId);
   const idx = all.findIndex((l) => l.id === lesson.id);
   const next = all[idx + 1];
+  const tc = lesson.teaching;
   const done = progress.completedLessons.includes(lesson.id);
   const prevScore = progress.lessonScores[lesson.id];
   const stats = competencyStats(progress);
@@ -76,6 +78,7 @@ export default function LessonPage({ id }: { id: string }) {
             {next ? <LinkButton to={`/lesson/${next.id}`}>{t('lesson.next', { n: next.number })}</LinkButton> : <LinkButton to="/courses">{t('lesson.backToCurriculum')}</LinkButton>}
           </div>
         </Card>
+        {lesson.teaching && <div className="mt-4"><QuizFeedback lessonId={lesson.id} outcomes={outcomes} /></div>}
       </div>
     );
   }
@@ -115,10 +118,29 @@ export default function LessonPage({ id }: { id: string }) {
           <H2>{t('lesson.objectives')}</H2>
           <ul className="list-inside list-disc space-y-1 text-slate-700">{lesson.objectives.map((o) => <li key={o}>{o}</li>)}</ul>
         </Card>
+        {tc && (
+          <Card>
+            <H2>{t('lesson.why')}</H2>
+            <p className="text-slate-700">{tc.why}</p>
+          </Card>
+        )}
         <Card>
           <H2>{t('lesson.idea')}</H2>
           <div className="space-y-3 text-slate-700">{lesson.explanation.map((p, i) => <p key={i}>{p}</p>)}</div>
         </Card>
+        {tc && (
+          <Card>
+            <H2>{t('lesson.terms')}</H2>
+            <dl className="grid gap-2 sm:grid-cols-2">
+              {tc.terms.map((x) => (
+                <div key={x.term} className="rounded-lg bg-slate-50 p-3">
+                  <dt className="text-sm font-semibold text-slate-900">{x.term}</dt>
+                  <dd className="mt-1 text-sm text-slate-700">{x.meaning}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
+        )}
         <Card>
           <H2>{t('lesson.formulas')}</H2>
           <dl className="space-y-3">
@@ -144,10 +166,45 @@ export default function LessonPage({ id }: { id: string }) {
             <Alert tone="blue" title={t('lesson.takeaway')}>{w.result}</Alert>
           </Card>
         ))}
+        {tc && (
+          <>
+            <Card>
+              <H2>{t('lesson.interpretation')}</H2>
+              <ul className="list-inside list-disc space-y-2 text-slate-700">{tc.interpretation.map((m) => <li key={m}>{m}</li>)}</ul>
+            </Card>
+            <Card>
+              <H2>{t('lesson.decisions')}</H2>
+              <p className="mb-2 text-sm text-slate-600">{t('lesson.decisionsNote')}</p>
+              <ul className="list-inside list-disc space-y-2 text-slate-700">{tc.decisions.map((m) => <li key={m}>{m}</li>)}</ul>
+            </Card>
+          </>
+        )}
         <Card>
           <H2>{t('lesson.misconceptions')}</H2>
           <ul className="list-inside list-disc space-y-2 text-slate-700">{lesson.misconceptions.map((m) => <li key={m}>{m}</li>)}</ul>
         </Card>
+        {tc && (
+          <>
+            <Card>
+              <H2>{t('lesson.check')}</H2>
+              <p className="mb-2 text-sm text-slate-600">{t('lesson.checkNote')}</p>
+              <ol className="space-y-3">
+                {tc.check.map((c) => (
+                  <li key={c.q} className="text-slate-700">
+                    <p>{c.q}</p>
+                    <details className="mt-1"><summary className="cursor-pointer text-sm font-medium text-indigo-700">{t('lesson.showAnswer')}</summary><p className="mt-1 rounded-lg bg-slate-50 p-2 text-sm">{c.a}</p></details>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+            <Card>
+              <H2>{t('lesson.takeaways')}</H2>
+              <ul className="list-inside list-disc space-y-1 text-slate-700">{tc.takeaways.map((m) => <li key={m}>{m}</li>)}</ul>
+              <p className="mt-3 text-sm text-slate-700"><span className="font-semibold">{t('lesson.apply')}</span> {tc.apply}</p>
+              {next && <p className="mt-2 text-sm text-slate-600">{t('lesson.recommendedNext')} <Link to={`/lesson/${next.id}`} className="font-semibold text-indigo-700 underline">{t('lesson.label', { n: next.number })}: {next.title}</Link></p>}
+            </Card>
+          </>
+        )}
         <div className="flex flex-wrap items-center gap-3">
           <button onClick={startQuiz} className="rounded-lg bg-indigo-700 px-5 py-2.5 font-semibold text-white hover:bg-indigo-800">{t('lesson.startQuiz', { n: Math.min(QUIZ_SIZE, lesson.questions.length), pool: lesson.questions.length })}</button>
         </div>
