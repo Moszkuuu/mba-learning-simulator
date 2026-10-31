@@ -1,19 +1,55 @@
 ﻿export type Unit = 'usd' | 'pct' | 'days' | 'units' | 'x' | 'years' | 'months' | 'num';
 
-/** Parses user input like "$1,234.50", "35%", " 60 days". Returns null when not a valid finite number. */
-export function parseNumericInput(raw: string): number | null {
-  if (typeof raw !== 'string') return null;
-  let s = raw.trim().replace(/[$,\s]/g, '').replace(/%$/, '').replace(/(days?|years?|yrs?|months?|x|units?|วัน|ปี|เดือน|หน่วย)$/i, '');
-  if (s === '') return null;
+export type NumericProblem = 'empty' | 'ambiguous-separator' | 'not-a-number';
+
+/** Thai digits (๐-๙) and full-width digits (０-９) become ASCII digits; minus-like signs become "-"; zero-width characters are dropped. */
+function toAsciiNumeric(raw: string): string {
+  return raw
+    .replace(/[​﻿]/g, '')
+    .replace(/[๐-๙]/g, (c) => String(c.charCodeAt(0) - 0x0e50))
+    .replace(/[０-９]/g, (c) => String(c.charCodeAt(0) - 0xff10))
+    .replace(/[−‒–﹣－]/g, '-');
+}
+
+function readNumeric(raw: unknown): { value: number } | { problem: NumericProblem } {
+  if (typeof raw !== 'string' || raw.trim() === '') return { problem: 'empty' };
+  let s = toAsciiNumeric(raw).replace(/\$/g, '').trim().replace(/\s*%$/, '').replace(/\s*(days?|years?|yrs?|months?|x|units?|วัน|ปี|เดือน|หน่วย)$/i, '').trim();
+  if (s === '') return { problem: 'not-a-number' };
   let negative = false;
-  if (/^\(.*\)$/.test(s)) {
+  const bracketed = /^\((.*)\)$/.exec(s);
+  if (bracketed) {
     negative = true;
-    s = s.slice(1, -1);
+    s = bracketed[1].trim();
+    if (/^[+-]/.test(s)) return { problem: 'not-a-number' }; // "(-5)" would be a double negative: do not guess
   }
-  if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(s)) return null;
-  const n = Number(s);
-  if (!Number.isFinite(n)) return null;
-  return negative ? -n : n;
+  const signed = /^([+-])\s*(.*)$/.exec(s); // "- 647,500" (a space after the sign) was accepted before and still is
+  const sign = signed ? signed[1] : '';
+  const body = signed ? signed[2] : s;
+  let digits: string | null = null;
+  if (/^(\d+\.?\d*|\.\d+)$/.test(body)) digits = body;
+  // A comma or a space may only be a thousands separator in the usual groups of three: 1,234,567.5 or 1 234 567. Anything else
+  // ("74,9", "1,23,456", "1.234,5") could mean a decimal comma or another grouping, so it is rejected rather than guessed.
+  else if (/^\d{1,3}(,\d{3})+(\.\d*)?$/.test(body)) digits = body.replace(/,/g, '');
+  else if (/^\d{1,3}(\s\d{3})+(\.\d*)?$/.test(body)) digits = body.replace(/\s/g, '');
+  if (digits === null) return { problem: /^[\d.,\s]+$/.test(body) && /[,\s]/.test(body) ? 'ambiguous-separator' : 'not-a-number' };
+  const n = Number(sign + digits);
+  if (!Number.isFinite(n)) return { problem: 'not-a-number' };
+  return { value: negative ? -n : n };
+}
+
+/**
+ * Parses user input like "$1,234.50", "35%", " 60 days", "(25,000)", "−647,500" or "๖๔๗,๕๐๐" (Thai digits).
+ * Returns null when the text is not a valid finite number, and also when it is ambiguous: "74,9" is never read as 749 or as 74.9.
+ */
+export function parseNumericInput(raw: string): number | null {
+  const r = readNumeric(raw);
+  return 'value' in r ? r.value : null;
+}
+
+/** Why parseNumericInput would return null (so a screen can ask the student to retype), or null when the text is a valid number. */
+export function numericInputProblem(raw: string): NumericProblem | null {
+  const r = readNumeric(raw);
+  return 'problem' in r ? r.problem : null;
 }
 
 export interface Tolerance {
