@@ -47,7 +47,50 @@ export function selfPoints(ratings: Record<string, number>): number {
   return Math.round(total * 10) / 10;
 }
 
-export const wordCount = (s: string): number => (s.trim() ? s.trim().split(/\s+/).length : 0);
+// Word counting. Text without Thai is counted as before (runs of non-space characters), so English counts do not change.
+// Thai is written without spaces between words, so text that contains Thai is split with Intl.Segmenter (the browser's Thai
+// dictionary) and only word-like segments are counted (words, numbers such as 262,500, Latin terms such as DSO; not spaces or punctuation).
+// Intl.Segmenter is not in the project's TypeScript lib (ES2020), hence the small local type.
+interface WordSegmenter { segment(input: string): Iterable<{ segment: string; isWordLike?: boolean }> }
+type SegmenterCtor = new (locales?: string | string[], options?: { granularity: 'word' }) => WordSegmenter;
+
+const HAS_THAI = /\p{Script=Thai}/u;
+const THAI_RUN = /\p{Script=Thai}+/gu;
+const COMBINING_MARK = /\p{M}/u;
+/** Thai base letters per word (about 2.8 on sample answers). Used only when Intl.Segmenter is unavailable. */
+export const THAI_LETTERS_PER_WORD = 3;
+
+let wordSegmenter: WordSegmenter | null | undefined;
+function getWordSegmenter(): WordSegmenter | null {
+  if (wordSegmenter === undefined) {
+    const Ctor = (Intl as unknown as { Segmenter?: SegmenterCtor }).Segmenter;
+    try { wordSegmenter = Ctor ? new Ctor('th', { granularity: 'word' }) : null; } catch { wordSegmenter = null; }
+  }
+  return wordSegmenter;
+}
+
+const spaceSeparatedCount = (s: string): number => (s.trim() ? s.trim().split(/\s+/).length : 0);
+
+/** Estimate for runtimes without Intl.Segmenter: each Thai run counts its base letters (no vowel or tone marks) divided by 3, rounded up. */
+export function thaiFallbackCount(text: string): number {
+  let thai = 0;
+  const rest = text.replace(THAI_RUN, (run) => {
+    thai += Math.ceil([...run].filter((c) => !COMBINING_MARK.test(c)).length / THAI_LETTERS_PER_WORD);
+    return ' ';
+  });
+  return thai + spaceSeparatedCount(rest);
+}
+
+export function wordCount(s: string): number {
+  const text = s.normalize('NFC').trim();
+  if (!text) return 0;
+  if (!HAS_THAI.test(text)) return spaceSeparatedCount(text);
+  const segmenter = getWordSegmenter();
+  if (!segmenter) return thaiFallbackCount(text);
+  let n = 0;
+  for (const part of segmenter.segment(text)) if (part.isWordLike) n++;
+  return n;
+}
 
 /** Mechanical completeness checks only: enough words written in each field. These say nothing about quality. */
 export function completeness(level: LabLevel, answers: Record<string, string>): { id: string; words: number; need: number; ok: boolean }[] {
