@@ -39,6 +39,7 @@ export const en = {
   'unit.num': 'Answer as a number (units are stated in the question)',
   'q.chooseFirst': 'Choose an answer before submitting.',
   'q.invalidNumber': 'Enter a valid number (digits only, e.g. 12500 or 35%).',
+  'num.ambiguous': 'This number was not read: a comma can mean a decimal point or a thousands separator. Write decimals with a point (74.9) and thousands as 1,250 or 1250.',
   'q.writeFirst': 'Write your answer first (at least a couple of sentences) before looking at the model answer.',
   'q.typeMcq': 'Multiple choice',
   'q.typeNumeric': 'Numerical',

@@ -2,7 +2,7 @@
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useProgress } from '../components/ProgressContext';
 import { Alert, Badge, Button, Card, H2, PageTitle, Stat } from '../components/ui';
-import { money, parseNumericInput } from '../lib/numeric';
+import { money, numericInputProblem, parseNumericInput } from '../lib/numeric';
 import {
   CUSTOMER_TERMS, MONTH_NAMES, SIM, SUPPLIER_TERMS, defaultDecision, demandFor, equityOf, initialState, payablesBalance,
   receivablesBalance, simulateMonth, summarize, unitCostFor, validateDecision, type MonthResult, type SimState, type SimWarning,
@@ -116,6 +116,7 @@ export default function SimulatorPage() {
     });
   }, [draft]);
   const bad = (field: string) => parsed.errors.some((e) => e.field === field);
+  const rawFor: Record<string, string> = { priceIndex: draft.price, marketing: draft.marketing, purchases: draft.purchases };
 
   const forecast = useMemo(() => {
     const d = parsed.decision;
@@ -177,7 +178,7 @@ export default function SimulatorPage() {
             <SelectField id="cterms" label={t('sim.customerTerms')} hint={t('sim.customerTermsHint')} value={draft.customer} options={CUSTOMER_TERMS} onChange={(v) => setDraft({ ...draft, customer: v })} t={t} />
             <SelectField id="sterms" label={t('sim.supplierTerms')} hint={t('sim.supplierTermsHint')} value={draft.supplier} options={SUPPLIER_TERMS} onChange={(v) => setDraft({ ...draft, supplier: v })} t={t} />
           </div>
-          {parsed.errors.length > 0 && <ul role="alert" className="mt-3 list-inside list-disc text-sm font-medium text-red-700">{parsed.errors.map((e) => <li key={e.field}>{fmtErr(e)}</li>)}</ul>}
+          {parsed.errors.length > 0 && <ul role="alert" className="mt-3 list-inside list-disc text-sm font-medium text-red-700">{parsed.errors.map((e) => <li key={e.field}>{fmtErr(e)}{numericInputProblem(rawFor[e.field] ?? '') === 'ambiguous-separator' ? ` ${t('num.ambiguous')}` : ''}</li>)}</ul>}
           <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
             <p className="font-semibold">{t('sim.preview')}</p>
             <p>{t('sim.previewBody', { demand: forecast.demand.units.toLocaleString('en-US'), season: forecast.demand.seasonality.toFixed(2), price: forecast.demand.price.toFixed(2), mkt: forecast.demand.marketing.toFixed(2), terms: forecast.demand.terms.toFixed(3), stock: forecast.stock.toLocaleString('en-US'), sold: forecast.sold.toLocaleString('en-US') })}</p>

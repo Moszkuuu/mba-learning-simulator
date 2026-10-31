@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Question } from '../content/types';
 import { competencyById } from '../curriculum/program';
 import { lessonKey, getLesson } from '../content';
-import { formatValue, isWithinTolerance, parseNumericInput } from '../lib/numeric';
+import { formatValue, isWithinTolerance, numericInputProblem, parseNumericInput } from '../lib/numeric';
 import { PASS_SCORE } from '../lib/progress';
 import { useI18n } from '../i18n';
 import { Alert, Badge, Button, Link } from './ui';
@@ -47,7 +47,7 @@ export function QuestionCard({ question, onAnswered, onNext, nextLabel }: {
       record({ correct, score: correct ? 1 : 0, given: question.options[selected].text });
     } else if (question.type === 'numeric') {
       const n = parseNumericInput(text);
-      if (n === null) { setError(t('q.invalidNumber')); return; }
+      if (n === null) { setError(t(numericInputProblem(text) === 'ambiguous-separator' ? 'num.ambiguous' : 'q.invalidNumber')); return; }
       const correct = isWithinTolerance(n, question.answer, question.unit, question.tolerance);
       record({ correct, score: correct ? 1 : 0, given: text.trim() });
     } else if (!revealed) {

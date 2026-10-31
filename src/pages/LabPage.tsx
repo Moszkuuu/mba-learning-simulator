@@ -5,6 +5,7 @@ import { Alert, Badge, Button, Card, H2, Link, LinkButton, PageTitle } from '../
 import { useI18n } from '../i18n';
 import { storageKeyFor } from '../lib/cloud/owner';
 import { LAB_CHANGED, LAB_SYNCED, completeness, effectiveSelfPoints, labKey, loadLab, quotedFigures, saveLab, verifiedPoints, verifiedResults, type CheckResult, type EarlierDraft, type LabDraft, type LabState } from '../lib/lab';
+import { numericInputProblem } from '../lib/numeric';
 import { GuestOffer } from '../components/AccountCard';
 import { CHECKS, FIELDS, LAB_LEVELS, RATING_MAX, RUBRIC, VERIFIED_POINTS, Y1, Y2, ccc, cashFromDso, dio, dpo, dso, equity, gross, netProfit, ocfY2, operatingProfit, profitBeforeTax, tax, totalAssets, tradeWorkingCapital, type LabLevel, type YearData } from '../lab/case';
 import { fill, labText, type LabText } from '../lab/text';
@@ -148,6 +149,13 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
   const stageName = (s: (typeof STAGES)[number]) => lt.stages[s];
 
   const taskFor = (r: CheckResult) => (r.id === 'consistency' ? null : lt.tasks[r.id]);
+  /** A clear message when a typed number cannot be read (for example "74,9", which could be a decimal comma). Empty input says nothing. */
+  const numberProblemNote = (raw: string) => {
+    const p = numericInputProblem(raw);
+    return p === 'ambiguous-separator' || p === 'not-a-number'
+      ? <p role="alert" className="mt-1 text-sm font-medium text-red-700">{p === 'ambiguous-separator' ? lt.numberProblem.ambiguous : lt.numberProblem.invalid}</p>
+      : null;
+  };
   /** Visible progress on the stage buttons: numbers entered, and written fields completed. */
   const entered = results.filter((r) => r.given !== null).length;
   const fieldsDone = completeness(level, draft.answers).filter((c) => c.ok).length;
@@ -219,10 +227,11 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
                     <label className="block text-sm font-medium">{task.prompt}
                       <input inputMode="decimal" value={given} onChange={(e) => setAnswer(c.id, e.target.value)} className={INPUT} />
                     </label>
+                    {numberProblemNote(given)}
                     {level === 'beginner' && (
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
                         <button type="button" className="text-indigo-700 underline" onClick={() => setOpen({ ...open, [c.id]: !open[c.id] })}>{lt.showHint}</button>
-                        {given && <Badge tone={res.correct ? 'green' : 'amber'}>{res.correct ? lt.correctLabel : lt.incorrectLabel}</Badge>}
+                        {given && !numericInputProblem(given) && <Badge tone={res.correct ? 'green' : 'amber'}>{res.correct ? lt.correctLabel : lt.incorrectLabel}</Badge>}
                       </div>
                     )}
                     {level === 'beginner' && open[c.id] && (
@@ -235,7 +244,9 @@ function Case({ lt, level, lab, update, saveOk }: { lt: LabText; level: LabLevel
                 <div className="rounded-lg bg-slate-50 p-3">
                   <p className="text-sm font-semibold">{lt.consistency.title}</p>
                   <label className="mt-2 block text-sm font-medium">{lt.consistency.targetDso}<input inputMode="decimal" value={draft.answers.targetDso ?? ''} onChange={(e) => setAnswer('targetDso', e.target.value)} className={INPUT} /></label>
+                  {numberProblemNote(draft.answers.targetDso ?? '')}
                   <label className="mt-2 block text-sm font-medium">{lt.consistency.release}<input inputMode="decimal" value={draft.answers.release ?? ''} onChange={(e) => setAnswer('release', e.target.value)} className={INPUT} /></label>
+                  {numberProblemNote(draft.answers.release ?? '')}
                   <p className="mt-1 text-xs text-slate-500">{lt.consistency.note}</p>
                 </div>
               )}

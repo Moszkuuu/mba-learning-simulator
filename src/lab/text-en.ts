@@ -14,6 +14,10 @@ export const labEn: LabText = {
   ],
   choose: 'Not sure which level to pick? Start with Beginner. If you can already calculate DSO and operating cash flow without formulas, try Intermediate. Choose Advanced when you are comfortable making a recommendation from incomplete information.',
   numberHint: 'Type numbers only. Commas and a $ sign are fine. Use a minus sign for negative amounts.',
+  numberProblem: {
+    ambiguous: 'This number was not read: a comma can mean a decimal point or a thousands separator. Write decimals with a point (74.9) and thousands as 1,250 or 1250.',
+    invalid: 'This is not a number the app can read. Use digits, for example 75, -647500, (647,500) or 35%.',
+  },
   answered: '{n} of {total} numbers entered',
   capNote: 'Self-assessed points count only after every written field has its minimum length, so an empty answer cannot score.',
   earlierTitle: 'Earlier versions from another device',
